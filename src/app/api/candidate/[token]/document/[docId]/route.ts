@@ -1,9 +1,15 @@
 import { NextRequest } from "next/server";
 import { onboardingsStore, saveUploadedFile } from "@/lib/store";
 import { logAuditEvent } from "@/lib/audit";
+<<<<<<< HEAD
+=======
+import { saveUploadedFile } from "@/lib/store";
+import { generateDocumentPdf, embedSignatureInPdf } from "@/lib/pdf-generator";
+>>>>>>> 5ee52b558ebf2a59190ff98d27e70362dd621648
 import { ok, notFound, badRequest } from "@/lib/api-helpers";
 import { generateDocumentPdf, embedSignatureInPdf } from "@/lib/pdf-generator";
 import { v4 as uuidv4 } from "uuid";
+import fs from "fs";
 import type { OnboardingDocument } from "@/lib/types";
 
 function getOnboardingByToken(token: string) {
@@ -53,6 +59,22 @@ export async function POST(
     }
 
     if (action === "sign" && signatureData) {
+      // Get the current PDF (filled or generate fresh)
+      let pdfBytes: Uint8Array;
+      if (doc.filledFileUrl && fs.existsSync(doc.filledFileUrl)) {
+        pdfBytes = new Uint8Array(fs.readFileSync(doc.filledFileUrl));
+      } else {
+        pdfBytes = await generateDocumentPdf(onboarding, doc);
+      }
+
+      // Embed the signature image into the PDF
+      const signedPdfBytes = await embedSignatureInPdf(pdfBytes, signatureData);
+
+      // Save the signed PDF to disk
+      const signedFileName = `${doc.name.replace(/\s+/g, "_")}_signed.pdf`;
+      const signedPath = saveUploadedFile(onboarding.id, signedFileName, Buffer.from(signedPdfBytes));
+
+      updatedDoc.signedFileUrl = signedPath;
       updatedDoc.candidateSignature = {
         dataUrl: signatureData,
         signedAt: new Date().toISOString(),

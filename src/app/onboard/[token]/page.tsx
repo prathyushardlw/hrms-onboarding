@@ -1,12 +1,31 @@
 "use client";
 
+<<<<<<< HEAD
 import { useEffect, useState, useRef } from "react";
 import { useParams } from "next/navigation";
+=======
+import { useEffect, useState, useRef, useCallback } from "react";
+import { useParams } from "next/navigation";
+import dynamic from "next/dynamic";
+>>>>>>> 5ee52b558ebf2a59190ff98d27e70362dd621648
 import {
   CheckCircle, Clock, FileText, Upload, AlertTriangle,
-  Pen, Loader2, Send
+  Eye, Loader2, Send
 } from "lucide-react";
+<<<<<<< HEAD
 import { PdfFormViewer } from "@/components/PdfFormViewer";
+=======
+
+// Dynamically import PDF viewer to avoid SSR issues with pdfjs
+const PdfSignViewer = dynamic(() => import("@/components/PdfSignViewer"), {
+  ssr: false,
+  loading: () => (
+    <div className="flex items-center justify-center h-64">
+      <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+    </div>
+  ),
+});
+>>>>>>> 5ee52b558ebf2a59190ff98d27e70362dd621648
 
 interface CandidateDocument {
   id: string;
@@ -42,17 +61,24 @@ export default function CandidatePortalPage() {
   const [onboarding, setOnboarding] = useState<CandidateOnboarding | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+<<<<<<< HEAD
   const [activeDoc, setActiveDoc] = useState<string | null>(null);
   const [viewerDoc, setViewerDoc] = useState<CandidateDocument | null>(null);
   const [actionLoading, setActionLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+=======
+  const [actionLoading, setActionLoading] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+
+  // PDF viewer state
+  const [viewingDoc, setViewingDoc] = useState<CandidateDocument | null>(null);
+
+  // Upload ref per document
+>>>>>>> 5ee52b558ebf2a59190ff98d27e70362dd621648
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [uploadDocId, setUploadDocId] = useState<string | null>(null);
 
-  useEffect(() => {
-    loadData();
-  }, [token]);
-
-  async function loadData() {
+  const loadData = useCallback(async () => {
     try {
       const res = await fetch(`/api/candidate/${token}`);
       const data = await res.json();
@@ -66,7 +92,11 @@ export default function CandidatePortalPage() {
       setError("Failed to load onboarding data");
     }
     setLoading(false);
-  }
+  }, [token]);
+
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
 
   const handleUpload = async (docId: string, file: File) => {
     setActionLoading(true);
@@ -82,15 +112,36 @@ export default function CandidatePortalPage() {
       const data = await res.json();
       if (data.success) await loadData();
     } catch {
-      // error handling
+      // handled
     }
     setActionLoading(false);
   };
 
+<<<<<<< HEAD
 
+=======
+  const handleSignOnPdf = async (docId: string, signatureDataUrl: string) => {
+    const formData = new FormData();
+    formData.append("signature", signatureDataUrl);
+    formData.append("action", "sign");
+
+    const res = await fetch(`/api/candidate/${token}/document/${docId}`, {
+      method: "POST",
+      body: formData,
+    });
+    const data = await res.json();
+    if (data.success) {
+      setViewingDoc(null);
+      await loadData();
+    } else {
+      throw new Error(data.error || "Signing failed");
+    }
+  };
+>>>>>>> 5ee52b558ebf2a59190ff98d27e70362dd621648
 
   const handleSubmitAll = async () => {
     setActionLoading(true);
+    setError("");
     try {
       const res = await fetch(`/api/candidate/${token}/submit`, {
         method: "POST",
@@ -111,7 +162,7 @@ export default function CandidatePortalPage() {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" />
+        <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
       </div>
     );
   }
@@ -121,23 +172,24 @@ export default function CandidatePortalPage() {
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="bg-white rounded-xl shadow-lg p-8 max-w-md text-center">
           <AlertTriangle className="h-12 w-12 text-red-400 mx-auto mb-4" />
-          <h2 className="text-lg font-bold text-gray-900 mb-2">
-            Unable to Load
-          </h2>
+          <h2 className="text-lg font-bold text-gray-900 mb-2">Unable to Load</h2>
           <p className="text-gray-500">{error}</p>
         </div>
       </div>
     );
   }
 
-  if (submitted || onboarding?.status === "submitted" || onboarding?.status === "verified" || onboarding?.status === "completed") {
+  if (
+    submitted ||
+    onboarding?.status === "submitted" ||
+    onboarding?.status === "verified" ||
+    onboarding?.status === "completed"
+  ) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="bg-white rounded-xl shadow-lg p-8 max-w-md text-center">
           <CheckCircle className="h-12 w-12 text-green-500 mx-auto mb-4" />
-          <h2 className="text-lg font-bold text-gray-900 mb-2">
-            Documents Submitted!
-          </h2>
+          <h2 className="text-lg font-bold text-gray-900 mb-2">Documents Submitted!</h2>
           <p className="text-gray-500">
             Thank you, {onboarding?.candidateName}. Your onboarding documents
             have been submitted successfully. HR will review them shortly.
@@ -166,9 +218,9 @@ export default function CandidatePortalPage() {
             Welcome, {onboarding.candidateName}!
           </h1>
           <p className="text-gray-500 mt-1 text-sm">
-            Please complete and sign your onboarding documents below.
+            Review each document, sign it on the PDF, then submit all documents.
           </p>
-          <div className="mt-4 flex items-center gap-4 text-sm text-gray-600">
+          <div className="mt-4 flex flex-wrap items-center gap-4 text-sm text-gray-600">
             <span>{onboarding.designation}</span>
             <span>·</span>
             <span>{onboarding.department}</span>
@@ -191,24 +243,40 @@ export default function CandidatePortalPage() {
         </div>
 
         {error && (
-          <div className="bg-red-50 text-red-600 text-sm p-3 rounded-lg">
-            {error}
-          </div>
+          <div className="bg-red-50 text-red-600 text-sm p-3 rounded-lg">{error}</div>
         )}
 
-        {/* Documents */}
+        {/* Hidden file input */}
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
+          className="hidden"
+          onChange={(e) => {
+            const file = e.target.files?.[0];
+            if (file && uploadDocId) {
+              handleUpload(uploadDocId, file);
+              setUploadDocId(null);
+            }
+            e.target.value = "";
+          }}
+        />
+
+        {/* Document List */}
         <div className="space-y-3">
           {onboarding.documents.map((doc) => {
             const ds = docStatusConfig[doc.status] || docStatusConfig.pending;
             const Icon = ds.icon;
-            const isActive = activeDoc === doc.id;
+            const isSigned = doc.status === "signed";
             const needsAction = ["pending", "correction_requested"].includes(doc.status);
+            const needsUpload = doc.name.includes("License") || doc.name.includes("SSN") || doc.name.includes("Banking");
 
             return (
               <div
                 key={doc.id}
                 className="bg-white rounded-xl shadow-sm overflow-hidden"
               >
+<<<<<<< HEAD
                 <div
                   className="p-4 flex items-center gap-4 cursor-pointer hover:bg-gray-50"
                   onClick={() => {
@@ -219,27 +287,24 @@ export default function CandidatePortalPage() {
                     }
                   }}
                 >
+=======
+                <div className="p-4 flex items-center gap-4">
+>>>>>>> 5ee52b558ebf2a59190ff98d27e70362dd621648
                   <Icon className={`h-5 w-5 flex-shrink-0 ${ds.color.split(" ")[1]}`} />
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium text-gray-900">
                       {doc.name}
-                      {doc.required && (
-                        <span className="text-red-500 ml-1">*</span>
-                      )}
+                      {doc.required && <span className="text-red-500 ml-1">*</span>}
                     </p>
                     {doc.correctionNote && (
-                      <p className="text-xs text-red-500 mt-0.5">
-                        {doc.correctionNote}
-                      </p>
+                      <p className="text-xs text-red-500 mt-0.5">{doc.correctionNote}</p>
+                    )}
+                    {isSigned && (
+                      <p className="text-xs text-green-600 mt-0.5">Signed and saved to PDF</p>
                     )}
                   </div>
-                  <span
-                    className={`text-xs font-medium px-2.5 py-1 rounded-full ${ds.color}`}
-                  >
-                    {ds.label}
-                  </span>
-                </div>
 
+<<<<<<< HEAD
                 {isActive && needsAction && doc.uploadRequired && (
                   <div className="px-4 pb-4 pt-2 border-t border-gray-100">
                     <input
@@ -271,15 +336,48 @@ export default function CandidatePortalPage() {
                       className="w-full flex items-center justify-center gap-2 bg-blue-600 text-white py-2.5 rounded-lg text-sm font-medium hover:bg-blue-700 mt-3"
                     >
                       <Pen className="h-4 w-4" /> Fill &amp; Sign
+=======
+                  <div className="flex items-center gap-2 flex-shrink-0">
+                    <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${ds.color}`}>
+                      {ds.label}
+                    </span>
+
+                    {/* View & Sign PDF button */}
+                    <button
+                      onClick={() => setViewingDoc(doc)}
+                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+                        needsAction
+                          ? "bg-blue-600 text-white hover:bg-blue-700"
+                          : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                      }`}
+                    >
+                      <Eye className="h-3.5 w-3.5" />
+                      {needsAction ? "View & Sign" : "View PDF"}
+>>>>>>> 5ee52b558ebf2a59190ff98d27e70362dd621648
                     </button>
+
+                    {/* Upload button for identity/banking docs */}
+                    {needsUpload && needsAction && (
+                      <button
+                        onClick={() => {
+                          setUploadDocId(doc.id);
+                          fileInputRef.current?.click();
+                        }}
+                        disabled={actionLoading}
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors"
+                      >
+                        <Upload className="h-3.5 w-3.5" />
+                        Upload
+                      </button>
+                    )}
                   </div>
-                )}
+                </div>
               </div>
             );
           })}
         </div>
 
-        {/* Submit */}
+        {/* Submit All */}
         <button
           onClick={handleSubmitAll}
           disabled={!allRequiredDone || actionLoading}
@@ -295,11 +393,12 @@ export default function CandidatePortalPage() {
 
         {!allRequiredDone && (
           <p className="text-center text-xs text-gray-400">
-            Complete all required documents (*) to submit.
+            Sign all required documents (*) to enable submission.
           </p>
         )}
       </div>
 
+<<<<<<< HEAD
       {/* PDF Form Viewer */}
       {viewerDoc && (
         <PdfFormViewer
@@ -311,6 +410,16 @@ export default function CandidatePortalPage() {
             setViewerDoc(null);
             await loadData();
           }}
+=======
+      {/* PDF Viewer Overlay */}
+      {viewingDoc && (
+        <PdfSignViewer
+          pdfUrl={`/api/candidate/${token}/document/${viewingDoc.id}/pdf`}
+          documentName={viewingDoc.name}
+          isSigned={viewingDoc.status === "signed"}
+          onSign={(signatureDataUrl) => handleSignOnPdf(viewingDoc.id, signatureDataUrl)}
+          onClose={() => setViewingDoc(null)}
+>>>>>>> 5ee52b558ebf2a59190ff98d27e70362dd621648
         />
       )}
     </div>
