@@ -1,0 +1,107 @@
+
+> hrms-onboarding@0.1.0 dev
+> next dev
+
+▲ Next.js 16.2.4 (Turbopack)
+- Local:         http://localhost:3000
+- Network:       http://192.168.1.66:3000
+✓ Ready in 1947ms
+
+ GET /login 200 in 936ms (next.js: 606ms, application-code: 330ms)
+ POST /api/seed 200 in 1220ms (next.js: 506ms, application-code: 714ms)
+ POST /api/auth/login 200 in 821ms (next.js: 223ms, application-code: 597ms)
+ POST /api/auth/login 200 in 573ms (next.js: 9ms, application-code: 564ms)
+ GET /dashboard 200 in 1251ms (next.js: 1191ms, application-code: 60ms)
+ GET /api/onboarding 200 in 454ms (next.js: 435ms, application-code: 19ms)
+ GET /api/onboarding 200 in 18ms (next.js: 6ms, application-code: 12ms)
+ GET /dashboard/onboarding/new 200 in 896ms (next.js: 832ms, application-code: 64ms)
+ GET /api/doc-rules 200 in 446ms (next.js: 430ms, application-code: 16ms)
+ GET /api/templates 200 in 552ms (next.js: 538ms, application-code: 14ms)
+ GET /api/companies 200 in 625ms (next.js: 610ms, application-code: 15ms)
+ GET /api/doc-rules 200 in 20ms (next.js: 8ms, application-code: 12ms)
+ GET /api/templates 200 in 32ms (next.js: 22ms, application-code: 10ms)
+ GET /api/companies 200 in 43ms (next.js: 34ms, application-code: 9ms)
+ POST /api/onboarding 201 in 44ms (next.js: 9ms, application-code: 35ms)
+ GET /dashboard/onboarding/0ec3a755-ddfd-4dfc-9c2e-f6f8cef6fd2a 200 in 2.2s (next.js: 2.1s, application-code: 77ms)
+ GET /api/onboarding/0ec3a755-ddfd-4dfc-9c2e-f6f8cef6fd2a/audit 200 in 1884ms (next.js: 1865ms, application-code: 19ms)
+ GET /api/onboarding/0ec3a755-ddfd-4dfc-9c2e-f6f8cef6fd2a/audit 200 in 34ms (next.js: 22ms, application-code: 12ms)
+ GET /api/onboarding/0ec3a755-ddfd-4dfc-9c2e-f6f8cef6fd2a 200 in 1980ms (next.js: 1969ms, application-code: 11ms)
+ GET /api/onboarding/0ec3a755-ddfd-4dfc-9c2e-f6f8cef6fd2a 200 in 44ms (next.js: 27ms, application-code: 18ms)
+========== EMAIL (console mode) ==========
+To: prathyusha.r@testgo.com
+Subject: Complete Your Onboarding Documents
+
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <h2 style="color: #1a1a1a;">Welcome to Acme Corporation!</h2>
+        <p>Dear test,</p>
+        <p>We're excited to have you join our team. Please complete and sign your onboarding documents using the secure link below.</p>
+        <div style="text-align: center; margin: 32px 0;">
+          <a href="http://localhost:3000/onboard/10607f93a33c39ad067d5a0aa7880c524bedb77dae35f89bc3288846bdb48f9e" 
+             style="background-color: #2563eb; color: white; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: bold;">
+            Complete Onboarding Documents
+          </a>
+        </div>
+        <p style="color: #666;">This link will expire in 7 days. If you have any questions, please contact HR.</p>
+        <hr style="border: none; border-top: 1px solid #eee; margin: 24px 0;" />
+        <p style="color: #999; font-size: 12px;">This is an automated message from the HR onboarding system.</p>
+      </div>
+    
+===========================================
+ POST /api/onboarding/0ec3a755-ddfd-4dfc-9c2e-f6f8cef6fd2a/send 200 in 1985ms (next.js: 1957ms, application-code: 28ms)
+ GET /api/onboarding/0ec3a755-ddfd-4dfc-9c2e-f6f8cef6fd2a 200 in 36ms (next.js: 23ms, application-code: 13ms)
+ GET /api/onboarding/0ec3a755-ddfd-4dfc-9c2e-f6f8cef6fd2a/audit 200 in 35ms (next.js: 22ms, application-code: 13ms)
+ GET /onboard/10607f93a33c39ad067d5a0aa7880c524bedb77dae35f89bc3288846bdb48f9e 200 in 2.3s (next.js: 2.1s, application-code: 275ms)
+[browser] A tree hydrated but some attributes of the server rendered HTML didn't match the client properties. This won't be patched up. This can happen if a SSR-ed Client Component used:
+
+- A server/client branch `if (typeof window !== 'undefined')`.
+- Variable input such as `Date.now()` or `Math.random()` which changes each time it's called.
+- Date formatting in a user's locale which doesn't match the server.
+- External changing data without sending a snapshot of it along with the HTML.
+- Invalid HTML tag nesting.
+
+It can also happen if the client has a browser extension installed which messes with the HTML before React loaded.
+
+https://react.dev/link/hydration-mismatch
+
+  ...
+    <HotReload globalError={[...]} webSocket={WebSocket} staticIndicatorState={{pathname:null, ...}}>
+      <AppDevOverlayErrorBoundary globalError={[...]}>
+        <ReplaySsrOnlyErrors>
+        <DevRootHTTPAccessFallbackBoundary>
+          <HTTPAccessFallbackBoundary notFound={<NotAllowedRootHTTPFallbackError>}>
+            <HTTPAccessFallbackErrorBoundary pathname="/onboard/1..." notFound={<NotAllowedRootHTTPFallbackError>} ...>
+              <RedirectBoundary>
+                <RedirectErrorBoundary router={{...}}>
+                  <Head>
+                  <__next_root_layout_boundary__>
+                    <SegmentViewNode type="layout" pagePath="layout.tsx">
+                      <SegmentTrieNode>
+                      <link>
+                      <script>
+                      <script>
+                      <script>
+                      <RootLayout>
+                        <html
+                          lang="en"
+                          className="geist_a71539c9-module__T19VSG__variable geist_mono_8d43a2aa-module__8Li5zG__varia..."
+-                         toscacontainsshadowdom="true"
+-                         openrequests="0"
+                        >
+                          <body
+                            className="min-h-full flex flex-col"
+-                           data-new-gr-c-s-check-loaded="14.1284.0"
+-                           data-gr-ext-installed=""
+                          >
+                  ...
+ 
+ GET /api/candidate/10607f93a33c39ad067d5a0aa7880c524bedb77dae35f89bc3288846bdb48f9e 200 in 2.1s (next.js: 2.1s, application-code: 32ms)
+ GET /dashboard/onboarding/0ec3a755-ddfd-4dfc-9c2e-f6f8cef6fd2a 200 in 384ms (next.js: 281ms, application-code: 102ms)
+ GET /dashboard/onboarding/0ec3a755-ddfd-4dfc-9c2e-f6f8cef6fd2a 200 in 205ms (next.js: 138ms, application-code: 67ms)
+✓ Compiled in 267ms
+✓ Compiled in 183ms
+ GET /dashboard/onboarding/0ec3a755-ddfd-4dfc-9c2e-f6f8cef6fd2a 200 in 295ms (next.js: 117ms, application-code: 178ms)
+ GET /dashboard/onboarding/0ec3a755-ddfd-4dfc-9c2e-f6f8cef6fd2a 200 in 137ms (next.js: 8ms, application-code: 128ms)
+ GET /dashboard/onboarding/0ec3a755-ddfd-4dfc-9c2e-f6f8cef6fd2a 200 in 58ms (next.js: 5ms, application-code: 54ms)
+ GET /dashboard/onboarding/0ec3a755-ddfd-4dfc-9c2e-f6f8cef6fd2a 200 in 264ms (next.js: 127ms, application-code: 138ms)
+ GET /dashboard/onboarding/0ec3a755-ddfd-4dfc-9c2e-f6f8cef6fd2a 200 in 143ms (next.js: 5ms, application-code: 138ms)
+ GET /dashboard/onboarding/0ec3a755-ddfd-4dfc-9c2e-f6f8cef6fd2a 200 in 81ms (next.js: 8ms, application-code: 73ms)

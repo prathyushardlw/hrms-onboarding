@@ -36,7 +36,8 @@ function drawField(
 
 export async function generateDocumentPdf(
   onboarding: Onboarding,
-  doc: OnboardingDocument
+  doc: OnboardingDocument,
+  fieldValues?: Record<string, string>
 ): Promise<Uint8Array> {
   const template = templatesStore.getById(doc.templateId);
   const pdfDoc = await PDFDocument.create();
@@ -155,6 +156,37 @@ export async function generateDocumentPdf(
     if (y < 200) break;
     page.drawText(line, { x: 40, y, size: 10, font, color: rgb(0.2, 0.2, 0.2) });
     y -= 16;
+  }
+
+  // Additional form fields section (if candidate provided field values)
+  if (fieldValues && Object.keys(fieldValues).length > 0) {
+    if (y > 250) {
+      page.drawText("ADDITIONAL INFORMATION", {
+        x: 40,
+        y,
+        size: 11,
+        font: fontBold,
+        color: rgb(0.15, 0.25, 0.45),
+      });
+      y -= 8;
+      page.drawLine({
+        start: { x: 40, y },
+        end: { x: width - 40, y },
+        thickness: 1,
+        color: rgb(0.85, 0.85, 0.85),
+      });
+      y -= 20;
+
+      for (const [key, value] of Object.entries(fieldValues)) {
+        if (!value || y < 200) continue;
+        const label = key
+          .replace(/([A-Z])/g, " $1")
+          .replace(/^./, (s) => s.toUpperCase())
+          .trim();
+        drawField(page, font, label, value, 40, y, width - 80);
+        y -= 50;
+      }
+    }
   }
 
   // Signature section at bottom

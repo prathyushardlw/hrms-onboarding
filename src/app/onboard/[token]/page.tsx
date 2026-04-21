@@ -1,17 +1,18 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import {
   CheckCircle, Clock, FileText, Upload, AlertTriangle,
   Pen, Loader2, Send
 } from "lucide-react";
-import SignatureCanvas from "react-signature-canvas";
+import { PdfFormViewer } from "@/components/PdfFormViewer";
 
 interface CandidateDocument {
   id: string;
   name: string;
   required: boolean;
+  uploadRequired: boolean;
   status: string;
   correctionNote?: string;
 }
@@ -42,10 +43,9 @@ export default function CandidatePortalPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [activeDoc, setActiveDoc] = useState<string | null>(null);
+  const [viewerDoc, setViewerDoc] = useState<CandidateDocument | null>(null);
   const [actionLoading, setActionLoading] = useState(false);
-  const [showSignature, setShowSignature] = useState(false);
   const [submitted, setSubmitted] = useState(false);
-  const sigRef = useRef<SignatureCanvas | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -87,32 +87,7 @@ export default function CandidatePortalPage() {
     setActionLoading(false);
   };
 
-  const handleSign = async (docId: string) => {
-    if (!sigRef.current) return;
-    if (sigRef.current.isEmpty()) return;
 
-    setActionLoading(true);
-    const signatureData = sigRef.current.toDataURL();
-    const formData = new FormData();
-    formData.append("signature", signatureData);
-    formData.append("action", "sign");
-
-    try {
-      const res = await fetch(`/api/candidate/${token}/document/${docId}`, {
-        method: "POST",
-        body: formData,
-      });
-      const data = await res.json();
-      if (data.success) {
-        setShowSignature(false);
-        setActiveDoc(null);
-        await loadData();
-      }
-    } catch {
-      // error handling
-    }
-    setActionLoading(false);
-  };
 
   const handleSubmitAll = async () => {
     setActionLoading(true);
@@ -236,7 +211,13 @@ export default function CandidatePortalPage() {
               >
                 <div
                   className="p-4 flex items-center gap-4 cursor-pointer hover:bg-gray-50"
-                  onClick={() => setActiveDoc(isActive ? null : doc.id)}
+                  onClick={() => {
+                    if (needsAction && !doc.uploadRequired) {
+                      setViewerDoc(doc);
+                    } else {
+                      setActiveDoc(isActive ? null : doc.id);
+                    }
+                  }}
                 >
                   <Icon className={`h-5 w-5 flex-shrink-0 ${ds.color.split(" ")[1]}`} />
                   <div className="flex-1 min-w-0">
@@ -259,41 +240,37 @@ export default function CandidatePortalPage() {
                   </span>
                 </div>
 
-                {isActive && needsAction && (
-                  <div className="px-4 pb-4 pt-2 border-t border-gray-100 space-y-3">
-                    {/* Upload */}
-                    <div>
-                      <input
-                        ref={fileInputRef}
-                        type="file"
-                        accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
-                        className="hidden"
-                        onChange={(e) => {
-                          const file = e.target.files?.[0];
-                          if (file) handleUpload(doc.id, file);
-                        }}
-                      />
-                      <button
-                        onClick={() => fileInputRef.current?.click()}
-                        disabled={actionLoading}
-                        className="w-full border-2 border-dashed border-gray-300 rounded-lg p-4 text-center hover:border-blue-400 hover:bg-blue-50 transition-colors"
-                      >
-                        <Upload className="h-5 w-5 mx-auto text-gray-400 mb-1" />
-                        <p className="text-sm text-gray-600">
-                          Click to upload file
-                        </p>
-                        <p className="text-xs text-gray-400">
-                          PDF, JPG, PNG, DOC
-                        </p>
-                      </button>
-                    </div>
-
-                    {/* Sign */}
+                {isActive && needsAction && doc.uploadRequired && (
+                  <div className="px-4 pb-4 pt-2 border-t border-gray-100">
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
+                      className="hidden"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) handleUpload(doc.id, file);
+                      }}
+                    />
                     <button
-                      onClick={() => setShowSignature(true)}
-                      className="w-full flex items-center justify-center gap-2 bg-blue-600 text-white py-2.5 rounded-lg text-sm font-medium hover:bg-blue-700"
+                      onClick={() => fileInputRef.current?.click()}
+                      disabled={actionLoading}
+                      className="w-full border-2 border-dashed border-gray-300 rounded-lg p-4 text-center hover:border-blue-400 hover:bg-blue-50 transition-colors"
                     >
-                      <Pen className="h-4 w-4" /> Add Signature
+                      <Upload className="h-5 w-5 mx-auto text-gray-400 mb-1" />
+                      <p className="text-sm text-gray-600">Click to upload file</p>
+                      <p className="text-xs text-gray-400">PDF, JPG, PNG, DOC</p>
+                    </button>
+                  </div>
+                )}
+
+                {needsAction && !doc.uploadRequired && (
+                  <div className="px-4 pb-4 pt-0 border-t border-gray-100">
+                    <button
+                      onClick={() => setViewerDoc(doc)}
+                      className="w-full flex items-center justify-center gap-2 bg-blue-600 text-white py-2.5 rounded-lg text-sm font-medium hover:bg-blue-700 mt-3"
+                    >
+                      <Pen className="h-4 w-4" /> Fill &amp; Sign
                     </button>
                   </div>
                 )}
@@ -323,53 +300,18 @@ export default function CandidatePortalPage() {
         )}
       </div>
 
-      {/* Signature Modal */}
-      {showSignature && activeDoc && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-md p-6">
-            <h3 className="font-semibold text-gray-900 mb-4">
-              Add Your Signature
-            </h3>
-            <div className="border-2 border-gray-200 rounded-lg overflow-hidden">
-              <SignatureCanvas
-                ref={(ref) => {
-                  sigRef.current = ref;
-                }}
-                canvasProps={{
-                  className: "w-full h-40",
-                  style: { width: "100%", height: "160px" },
-                }}
-                backgroundColor="white"
-              />
-            </div>
-            <div className="flex justify-between mt-4">
-              <button
-                onClick={() => sigRef.current?.clear()}
-                className="text-sm text-gray-500 hover:text-gray-700"
-              >
-                Clear
-              </button>
-              <div className="flex gap-2">
-                <button
-                  onClick={() => {
-                    setShowSignature(false);
-                  }}
-                  className="px-4 py-2 text-sm text-gray-600 hover:text-gray-900"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={() => handleSign(activeDoc)}
-                  disabled={actionLoading}
-                  className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50 flex items-center gap-2"
-                >
-                  {actionLoading && <Loader2 className="h-4 w-4 animate-spin" />}
-                  Apply Signature
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
+      {/* PDF Form Viewer */}
+      {viewerDoc && (
+        <PdfFormViewer
+          token={token as string}
+          docId={viewerDoc.id}
+          docName={viewerDoc.name}
+          onClose={() => setViewerDoc(null)}
+          onComplete={async () => {
+            setViewerDoc(null);
+            await loadData();
+          }}
+        />
       )}
     </div>
   );

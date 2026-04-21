@@ -66,6 +66,7 @@ export async function POST(req: NextRequest) {
           templateId,
           name: template?.name || "Unknown Document",
           required: true,
+          uploadRequired: template?.uploadRequired ?? false,
           status: "pending" as const,
         };
       }

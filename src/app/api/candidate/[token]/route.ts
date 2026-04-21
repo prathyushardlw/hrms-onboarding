@@ -50,9 +50,9 @@ export async function GET(
       id: doc.id,
       name: doc.name,
       required: doc.required,
+      uploadRequired: doc.uploadRequired ?? false,
       status: doc.status,
       correctionNote: doc.correctionNote,
-      uploadRequired: doc.uploadedFileUrl !== undefined || doc.status === "pending",
     })),
   });
 }

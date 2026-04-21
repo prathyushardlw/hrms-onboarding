@@ -1,8 +1,8 @@
 import { NextRequest } from "next/server";
-import { onboardingsStore } from "@/lib/store";
+import { onboardingsStore, saveUploadedFile } from "@/lib/store";
 import { logAuditEvent } from "@/lib/audit";
-import { saveUploadedFile } from "@/lib/store";
 import { ok, notFound, badRequest } from "@/lib/api-helpers";
+import { generateDocumentPdf, embedSignatureInPdf } from "@/lib/pdf-generator";
 import { v4 as uuidv4 } from "uuid";
 import type { OnboardingDocument } from "@/lib/types";
 
@@ -69,6 +69,40 @@ export async function POST(
 
     if (action === "fill") {
       updatedDoc.status = "filled";
+    }
+
+    if (action === "fill_and_sign" && signatureData) {
+      // Parse extra field values
+      const fieldValuesRaw = formData.get("fieldValues") as string | null;
+      const fieldValues: Record<string, string> = fieldValuesRaw
+        ? JSON.parse(fieldValuesRaw)
+        : {};
+
+      // Generate PDF with field values pre-filled
+      const pdfBytes = await generateDocumentPdf(onboarding, doc, fieldValues);
+
+      // Embed the signature image into the PDF
+      const signedBytes = await embedSignatureInPdf(pdfBytes, signatureData);
+
+      // Save to disk
+      const fileName = `${doc.name.replace(/\s+/g, "_")}_signed_${uuidv4().slice(0, 8)}.pdf`;
+      const filePath = saveUploadedFile(onboarding.id, fileName, Buffer.from(signedBytes));
+
+      updatedDoc.signedFileUrl = filePath;
+      updatedDoc.fieldValues = fieldValues;
+      updatedDoc.candidateSignature = {
+        dataUrl: signatureData,
+        signedAt: new Date().toISOString(),
+      };
+      updatedDoc.status = "signed";
+      updatedDoc.completedAt = new Date().toISOString();
+
+      logAuditEvent({
+        onboardingId: onboarding.id,
+        event: "document_signed",
+        performedBy: { type: "candidate" },
+        metadata: { documentId: docId, documentName: doc.name },
+      });
     }
 
     const updatedDocs = [...onboarding.documents];

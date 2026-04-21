@@ -101,7 +101,9 @@ export interface OnboardingDocument {
   templateId: string;
   name: string;
   required: boolean;
+  uploadRequired: boolean;
   status: DocumentStatus;
+  fieldValues?: Record<string, string>;
   filledFileUrl?: string;
   signedFileUrl?: string;
   uploadedFileUrl?: string;
