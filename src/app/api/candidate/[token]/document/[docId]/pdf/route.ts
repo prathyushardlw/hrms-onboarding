@@ -36,8 +36,11 @@ export async function GET(
     metadata: { documentId: docId, documentName: doc.name },
   });
 
-  // If already signed, serve the signed PDF
-  if (doc.signedFileUrl && fs.existsSync(doc.signedFileUrl)) {
+  // If correction requested, serve the clean template so fields don't overlap old data
+  const needsCleanTemplate = doc.status === "correction_requested";
+
+  // If already signed and not needing correction, serve the signed PDF
+  if (!needsCleanTemplate && doc.signedFileUrl && fs.existsSync(doc.signedFileUrl)) {
     const signedBytes = fs.readFileSync(doc.signedFileUrl);
     return new NextResponse(signedBytes, {
       headers: {
@@ -47,8 +50,8 @@ export async function GET(
     });
   }
 
-  // If filled PDF exists on disk, serve it
-  if (doc.filledFileUrl && fs.existsSync(doc.filledFileUrl)) {
+  // If filled PDF exists on disk and not needing correction, serve it
+  if (!needsCleanTemplate && doc.filledFileUrl && fs.existsSync(doc.filledFileUrl)) {
     const filledBytes = fs.readFileSync(doc.filledFileUrl);
     return new NextResponse(filledBytes, {
       headers: {

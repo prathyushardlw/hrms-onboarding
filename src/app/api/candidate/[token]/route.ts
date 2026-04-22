@@ -51,8 +51,10 @@ export async function GET(
       name: doc.name,
       required: doc.required,
       uploadRequired: doc.uploadRequired ?? false,
+      documentAction: doc.documentAction || "sign_and_return",
       status: doc.status,
       correctionNote: doc.correctionNote,
+      fieldValues: doc.status === "correction_requested" ? doc.fieldValues : undefined,
     })),
   });
 }

@@ -53,13 +53,13 @@ export default function DashboardLayout({
     <div className="min-h-screen bg-gray-50 flex">
       {/* Sidebar */}
       <aside
-        className={`fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-gray-200 transform transition-transform duration-200 lg:translate-x-0 lg:static lg:inset-auto ${
+        className={`fixed inset-y-0 left-0 z-50 w-64 bg-[#0e382b] border-r border-[#18471c] transform transition-transform duration-200 lg:translate-x-0 lg:static lg:inset-auto ${
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
-        <div className="flex items-center gap-2 px-6 py-5 border-b border-gray-100">
-          <Building2 className="h-6 w-6 text-blue-600" />
-          <span className="font-bold text-lg text-gray-900">HRMS</span>
+        <div className="flex items-center gap-2 px-6 py-5 border-b border-[#18471c]">
+          <span className="text-2xl">📋</span>
+          <span className="font-bold text-lg text-white">Onboarding</span>
         </div>
 
         <nav className="px-3 py-4 space-y-1">
@@ -74,8 +74,8 @@ export default function DashboardLayout({
                 onClick={() => setSidebarOpen(false)}
                 className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
                   isActive
-                    ? "bg-blue-50 text-blue-700"
-                    : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                    ? "bg-[#08bf36]/15 text-[#08bf36]"
+                    : "text-gray-300 hover:bg-white/5 hover:text-white"
                 }`}
               >
                 <Icon className="h-5 w-5" />
@@ -85,16 +85,16 @@ export default function DashboardLayout({
           })}
         </nav>
 
-        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-100">
+        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-[#18471c]">
           <div className="flex items-center gap-3 px-3 py-2">
-            <div className="h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 font-medium text-sm">
+            <div className="h-8 w-8 rounded-full bg-[#08bf36]/20 flex items-center justify-center text-[#08bf36] font-medium text-sm">
               {user.name.charAt(0).toUpperCase()}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-gray-900 truncate">
+              <p className="text-sm font-medium text-white truncate">
                 {user.name}
               </p>
-              <p className="text-xs text-gray-500 truncate">{user.role}</p>
+              <p className="text-xs text-gray-400 truncate">{user.role}</p>
             </div>
             <button
               onClick={() => {
@@ -128,7 +128,7 @@ export default function DashboardLayout({
             <Menu className="h-5 w-5" />
           </button>
           <h1 className="text-lg font-semibold text-gray-900">
-            E-Onboarding
+            Onboarding
           </h1>
         </header>
 

@@ -85,6 +85,8 @@ export interface PdfFormField {
   fontSize?: number;
 }
 
+export type DocumentAction = "sign_and_return" | "fill_sign_return" | "upload" | "read_only";
+
 export interface DocumentTemplate {
   id: string;
   companyId: string;
@@ -95,6 +97,7 @@ export interface DocumentTemplate {
   placeholders: TemplatePlaceholder[];
   signatureFields: SignatureField[];
   formFields?: PdfFormField[];
+  documentAction: DocumentAction;
   uploadRequired: boolean;
   isActive: boolean;
   createdAt: string;
@@ -117,6 +120,7 @@ export interface OnboardingDocument {
   name: string;
   required: boolean;
   uploadRequired: boolean;
+  documentAction: DocumentAction;
   status: DocumentStatus;
   fieldValues?: Record<string, string>;
   filledFileUrl?: string;
@@ -132,6 +136,8 @@ export interface Onboarding {
   id: string;
   companyId: string;
   candidate: {
+    firstName: string;
+    lastName: string;
     name: string;
     email: string;
     phone: string;

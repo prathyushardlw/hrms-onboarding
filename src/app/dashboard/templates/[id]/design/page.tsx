@@ -3,9 +3,12 @@
 import { useEffect, useState, use } from "react";
 import { useAuth, useAuthFetch } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Upload, Loader2 } from "lucide-react";
+import { ArrowLeft, Upload, Loader2, Wand2 } from "lucide-react";
 import dynamic from "next/dynamic";
-import type { DocumentTemplate } from "@/lib/types";
+import type { DocumentTemplate, PdfFormField, SignatureField } from "@/lib/types";
+import { pdfjs } from "react-pdf";
+
+pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
 
 const PdfFieldDesigner = dynamic(
   () => import("@/components/PdfFieldDesigner"),
@@ -26,6 +29,7 @@ export default function TemplateDesignPage({
   const [uploading, setUploading] = useState(false);
   const [showDesigner, setShowDesigner] = useState(false);
   const [pdfBlobUrl, setPdfBlobUrl] = useState<string | null>(null);
+  const [detecting, setDetecting] = useState(false);
   const [error, setError] = useState("");
 
   useEffect(() => {
@@ -89,7 +93,7 @@ export default function TemplateDesignPage({
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" />
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-600" />
       </div>
     );
   }
@@ -172,9 +176,9 @@ export default function TemplateDesignPage({
             </label>
           </div>
         ) : (
-          <label className="flex flex-col items-center justify-center border-2 border-dashed border-gray-300 rounded-lg px-6 py-10 cursor-pointer hover:border-blue-400 hover:bg-blue-50/50 transition-colors">
+          <label className="flex flex-col items-center justify-center border-2 border-dashed border-gray-300 rounded-lg px-6 py-10 cursor-pointer hover:border-blue-400 hover:bg-emerald-50/50 transition-colors">
             {uploading ? (
-              <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+              <Loader2 className="h-8 w-8 animate-spin text-emerald-700" />
             ) : (
               <>
                 <Upload className="h-8 w-8 text-gray-400 mb-2" />
@@ -207,12 +211,67 @@ export default function TemplateDesignPage({
           Step 2: Position Fields on PDF
         </h3>
         <p className="text-sm text-gray-500 mb-4">
-          Open the visual designer to place, drag, and resize text fields,
-          checkboxes, and signature areas on the PDF. Once you finalize positions,
-          they&apos;ll be locked to the PDF.
+          Auto-detect reads the PDF and pre-fills field positions. You can then
+          adjust, add, or remove fields in the visual designer.
         </p>
 
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3 flex-wrap">
+          <button
+            onClick={async () => {
+              setDetecting(true);
+              setError("");
+              try {
+                // Load PDF with auth
+                const pdfRes = await fetch(`/api/templates/${id}/pdf`, {
+                  headers: { Authorization: `Bearer ${token}` },
+                });
+                if (!pdfRes.ok) {
+                  setError("Failed to load PDF");
+                  setDetecting(false);
+                  return;
+                }
+                const blob = await pdfRes.blob();
+                const blobUrl = URL.createObjectURL(blob);
+                setPdfBlobUrl(blobUrl);
+
+                // If no existing fields, auto-detect using client-side pdfjs
+                const hasExisting = (template.formFields?.length || 0) > 0;
+                if (!hasExisting) {
+                  const arrayBuf = await blob.arrayBuffer();
+                  const pdfDoc = await pdfjs.getDocument({ data: arrayBuf }).promise;
+                  const { detectFieldsFromPdf } = await import("@/lib/detect-fields");
+                  const detected = await detectFieldsFromPdf(pdfDoc);
+
+                  // Save detected fields to template
+                  if (detected.formFields.length > 0 || detected.signatureFields.length > 0) {
+                    const saveRes = await authFetch(`/api/templates/${id}`, {
+                      method: "PUT",
+                      body: JSON.stringify({
+                        formFields: detected.formFields,
+                        signatureFields: detected.signatureFields,
+                      }),
+                    });
+                    if (saveRes.success) setTemplate(saveRes.data);
+                  }
+                }
+
+                setShowDesigner(true);
+              } catch (err) {
+                setError("Detection failed: " + (err as Error).message);
+              }
+              setDetecting(false);
+            }}
+            disabled={!template.fileName || detecting}
+            className="bg-[#0e382b] text-white px-5 py-2.5 rounded-lg text-sm font-medium hover:bg-[#18471c] disabled:opacity-50 flex items-center gap-2"
+          >
+            {detecting ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Wand2 className="h-4 w-4" />
+            )}
+            {detecting ? "Detecting fields..." : "Auto-Detect & Open Designer"}
+          </button>
+
           <button
             onClick={async () => {
               const res = await fetch(`/api/templates/${id}/pdf`, {
@@ -227,9 +286,9 @@ export default function TemplateDesignPage({
               }
             }}
             disabled={!template.fileName}
-            className="bg-blue-600 text-white px-5 py-2.5 rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50"
+            className="border border-gray-300 text-gray-700 px-5 py-2.5 rounded-lg text-sm font-medium hover:bg-gray-50 disabled:opacity-50"
           >
-            Open Field Designer
+            Open Designer (manual)
           </button>
 
           {(template.formFields?.length || 0) > 0 && (

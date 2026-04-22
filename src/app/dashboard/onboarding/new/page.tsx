@@ -24,7 +24,8 @@ export default function NewOnboardingPage() {
   // Form
   const [form, setForm] = useState({
     companyId: "",
-    candidateName: "",
+    candidateFirstName: "",
+    candidateLastName: "",
     candidateEmail: "",
     candidatePhone: "",
     candidateAddress: "",
@@ -76,6 +77,13 @@ export default function NewOnboardingPage() {
   const updateForm = (key: string, value: string) =>
     setForm((f) => ({ ...f, [key]: value }));
 
+  const formatPhone = (value: string) => {
+    const digits = value.replace(/\D/g, "").slice(0, 10);
+    if (digits.length <= 3) return digits;
+    if (digits.length <= 6) return `(${digits.slice(0, 3)}) ${digits.slice(3)}`;
+    return `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6)}`;
+  };
+
   const toggleDoc = (id: string) => {
     setSelectedDocs((prev) => {
       const next = new Set(prev);
@@ -89,9 +97,10 @@ export default function NewOnboardingPage() {
     if (step === 0) {
       return (
         form.companyId &&
-        form.candidateName &&
+        form.candidateFirstName &&
+        form.candidateLastName &&
         form.candidateEmail &&
-        form.candidatePhone &&
+        form.candidatePhone.replace(/\D/g, "").length === 10 &&
         form.department &&
         form.designation &&
         form.joiningDate
@@ -110,7 +119,8 @@ export default function NewOnboardingPage() {
       body: JSON.stringify({
         companyId: form.companyId,
         candidate: {
-          name: form.candidateName,
+          firstName: form.candidateFirstName,
+          lastName: form.candidateLastName,
           email: form.candidateEmail,
           phone: form.candidatePhone,
           address: form.candidateAddress,
@@ -155,7 +165,7 @@ export default function NewOnboardingPage() {
             <div
               className={`flex items-center justify-center h-8 w-8 rounded-full text-sm font-medium ${
                 i <= step
-                  ? "bg-blue-600 text-white"
+                  ? "bg-[#0e382b] text-white"
                   : "bg-gray-200 text-gray-500"
               }`}
             >
@@ -171,7 +181,7 @@ export default function NewOnboardingPage() {
             {i < steps.length - 1 && (
               <div
                 className={`flex-1 h-0.5 mx-4 ${
-                  i < step ? "bg-blue-600" : "bg-gray-200"
+                  i < step ? "bg-[#0e382b]" : "bg-gray-200"
                 }`}
               />
             )}
@@ -196,7 +206,7 @@ export default function NewOnboardingPage() {
               <select
                 value={form.companyId}
                 onChange={(e) => updateForm("companyId", e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 outline-none"
               >
                 {companies.map((c) => (
                   <option key={c.id} value={c.id}>
@@ -212,7 +222,7 @@ export default function NewOnboardingPage() {
               <select
                 value={form.employmentType}
                 onChange={(e) => updateForm("employmentType", e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 outline-none"
               >
                 <option value="full-time">Full Time</option>
                 <option value="part-time">Part Time</option>
@@ -225,16 +235,31 @@ export default function NewOnboardingPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Candidate Name *
+                First Name *
               </label>
               <input
                 type="text"
-                value={form.candidateName}
-                onChange={(e) => updateForm("candidateName", e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none"
-                placeholder="John Doe"
+                value={form.candidateFirstName}
+                onChange={(e) => updateForm("candidateFirstName", e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 outline-none"
+                placeholder="John"
               />
             </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Last Name *
+              </label>
+              <input
+                type="text"
+                value={form.candidateLastName}
+                onChange={(e) => updateForm("candidateLastName", e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 outline-none"
+                placeholder="Doe"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Email Address *
@@ -243,13 +268,10 @@ export default function NewOnboardingPage() {
                 type="email"
                 value={form.candidateEmail}
                 onChange={(e) => updateForm("candidateEmail", e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 outline-none"
                 placeholder="john@example.com"
               />
             </div>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Phone Number *
@@ -257,11 +279,14 @@ export default function NewOnboardingPage() {
               <input
                 type="tel"
                 value={form.candidatePhone}
-                onChange={(e) => updateForm("candidatePhone", e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none"
-                placeholder="+1 555-0123"
+                onChange={(e) => updateForm("candidatePhone", formatPhone(e.target.value))}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 outline-none"
+                placeholder="(555) 123-4567"
               />
             </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Address
@@ -270,7 +295,7 @@ export default function NewOnboardingPage() {
                 type="text"
                 value={form.candidateAddress}
                 onChange={(e) => updateForm("candidateAddress", e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 outline-none"
                 placeholder="123 Main St, City, State"
               />
             </div>
@@ -285,7 +310,7 @@ export default function NewOnboardingPage() {
                 type="text"
                 value={form.department}
                 onChange={(e) => updateForm("department", e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 outline-none"
                 placeholder="Engineering"
               />
             </div>
@@ -297,7 +322,7 @@ export default function NewOnboardingPage() {
                 type="text"
                 value={form.designation}
                 onChange={(e) => updateForm("designation", e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 outline-none"
                 placeholder="Software Engineer"
               />
             </div>
@@ -309,7 +334,7 @@ export default function NewOnboardingPage() {
                 type="date"
                 value={form.joiningDate}
                 onChange={(e) => updateForm("joiningDate", e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 outline-none"
               />
             </div>
           </div>
@@ -331,7 +356,7 @@ export default function NewOnboardingPage() {
                   key={template.id}
                   className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-colors ${
                     isSelected
-                      ? "border-blue-200 bg-blue-50"
+                      ? "border-emerald-200 bg-emerald-50"
                       : "border-gray-200 hover:bg-gray-50"
                   }`}
                 >
@@ -339,7 +364,7 @@ export default function NewOnboardingPage() {
                     type="checkbox"
                     checked={isSelected}
                     onChange={() => toggleDoc(template.id)}
-                    className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                    className="h-4 w-4 rounded border-gray-300 text-emerald-700 focus:ring-emerald-500"
                   />
                   <div className="flex-1">
                     <p className="text-sm font-medium text-gray-900">
@@ -374,7 +399,7 @@ export default function NewOnboardingPage() {
           <div className="grid grid-cols-2 gap-4 text-sm">
             <div>
               <p className="text-gray-500">Candidate</p>
-              <p className="font-medium">{form.candidateName}</p>
+              <p className="font-medium">{form.candidateFirstName} {form.candidateLastName}</p>
             </div>
             <div>
               <p className="text-gray-500">Email</p>
@@ -445,7 +470,7 @@ export default function NewOnboardingPage() {
           <button
             onClick={() => setStep((s) => s + 1)}
             disabled={!canProceed()}
-            className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50 flex items-center gap-1"
+            className="bg-[#0e382b] text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-[#18471c] disabled:opacity-50 flex items-center gap-1"
           >
             Next <ArrowRight className="h-4 w-4" />
           </button>
@@ -453,7 +478,7 @@ export default function NewOnboardingPage() {
           <button
             onClick={handleSubmit}
             disabled={loading || !canProceed()}
-            className="bg-blue-600 text-white px-6 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50 flex items-center gap-2"
+            className="bg-[#0e382b] text-white px-6 py-2 rounded-lg text-sm font-medium hover:bg-[#18471c] disabled:opacity-50 flex items-center gap-2"
           >
             {loading && <Loader2 className="h-4 w-4 animate-spin" />}
             Create Onboarding

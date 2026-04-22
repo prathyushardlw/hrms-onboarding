@@ -273,10 +273,15 @@ export async function embedSignatureInPdf(
   // Determine which page and where to place the signature
   const pageIndex = position?.page ?? pages.length - 1;
   const targetPage = pages[Math.min(pageIndex, pages.length - 1)];
-  const boxX = position?.x ?? 40;
-  const boxY = position?.y ?? 70;
-  const boxW = position?.width ?? 250;
-  const boxH = position?.height ?? 80;
+  const { width: pageW, height: pageH } = targetPage.getSize();
+
+  // Default: bottom-right corner with margin
+  const sigW = position?.width ?? 180;
+  const sigH = position?.height ?? 60;
+  const boxX = position?.x ?? (pageW - sigW - 40);
+  const boxY = position?.y ?? 40;
+  const boxW = sigW;
+  const boxH = sigH;
 
   // Decode the signature image from data URL
   const base64Data = signatureDataUrl.split(",")[1];

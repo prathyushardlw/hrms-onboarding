@@ -89,7 +89,11 @@ export function useAuthFetch() {
         headers.set("Content-Type", "application/json");
       }
       const res = await fetch(url, { ...options, headers });
-      return res.json();
+      try {
+        return await res.json();
+      } catch {
+        return { success: false, error: `Request failed with status ${res.status}` };
+      }
     },
     [token]
   );

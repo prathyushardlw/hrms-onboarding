@@ -41,6 +41,7 @@ export async function POST(req: NextRequest) {
       templateType: parsed.data.templateType,
       placeholders: parsed.data.placeholders,
       signatureFields: parsed.data.signatureFields,
+      documentAction: parsed.data.documentAction || "sign_and_return",
       uploadRequired: parsed.data.uploadRequired,
       isActive: true,
       createdAt: now,

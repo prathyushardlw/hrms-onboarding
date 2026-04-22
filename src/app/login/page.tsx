@@ -33,7 +33,7 @@ export default function LoginPage() {
       const res = await fetch("/api/seed", { method: "POST" });
       const data = await res.json();
       if (data.success) {
-        setEmail("admin@acme.com");
+        setEmail("admin@mlx.com");
         setPassword("password123");
       } else {
         setError(data.error || "Seed failed");
@@ -50,7 +50,10 @@ export default function LoginPage() {
       <div className="w-full max-w-md">
         <div className="bg-white rounded-xl shadow-lg p-8">
           <div className="text-center mb-8">
-            <h1 className="text-2xl font-bold text-gray-900">HRMS Onboarding</h1>
+            <div className="inline-flex items-center justify-center w-14 h-14 rounded-xl bg-[#0e382b] mb-3">
+              <span className="text-2xl">📋</span>
+            </div>
+            <h1 className="text-2xl font-bold text-gray-900">Onboarding</h1>
             <p className="text-gray-500 mt-1">Sign in to your account</p>
           </div>
 
@@ -69,8 +72,8 @@ export default function LoginPage() {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
-                placeholder="admin@acme.com"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none"
+                placeholder="admin@mlx.com"
                 required
               />
             </div>
@@ -82,7 +85,7 @@ export default function LoginPage() {
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none"
                 placeholder="••••••"
                 required
               />
@@ -90,7 +93,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-blue-600 text-white py-2.5 rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50 transition-colors"
+              className="w-full bg-[#0e382b] text-white py-2.5 rounded-lg font-medium hover:bg-[#18471c] disabled:opacity-50 transition-colors"
             >
               {loading ? "Signing in..." : "Sign In"}
             </button>
@@ -100,7 +103,7 @@ export default function LoginPage() {
             <button
               onClick={handleSeed}
               disabled={seeding}
-              className="text-sm text-gray-500 hover:text-blue-600 transition-colors"
+              className="text-sm text-gray-500 hover:text-emerald-600 transition-colors"
             >
               {seeding ? "Seeding..." : "Initialize demo data"}
             </button>

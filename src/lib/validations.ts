@@ -5,9 +5,10 @@ import { z } from "zod";
 export const createOnboardingSchema = z.object({
   companyId: z.string().min(1, "Company is required"),
   candidate: z.object({
-    name: z.string().min(1, "Candidate name is required"),
+    firstName: z.string().min(1, "First name is required"),
+    lastName: z.string().min(1, "Last name is required"),
     email: z.string().email("Valid email is required"),
-    phone: z.string().min(1, "Phone number is required"),
+    phone: z.string().min(14, "Valid phone number is required"),
     address: z.string().optional(),
     ssn: z.string().optional(),
   }),
@@ -45,6 +46,7 @@ export const createTemplateSchema = z.object({
       height: z.number(),
     })
   ).default([]),
+  documentAction: z.enum(["sign_and_return", "fill_sign_return", "upload", "read_only"]).default("sign_and_return"),
   uploadRequired: z.boolean().default(false),
 });
 
@@ -88,6 +90,6 @@ export const registerSchema = z.object({
 // ---- Correction request ----
 
 export const correctionRequestSchema = z.object({
-  documentId: z.string().min(1),
+  documentIds: z.array(z.string().min(1)).min(1, "Select at least one document"),
   note: z.string().min(1, "Correction note is required"),
 });

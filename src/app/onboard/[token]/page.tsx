@@ -13,7 +13,7 @@ const PdfSignViewer = dynamic(() => import("@/components/PdfSignViewer"), {
   ssr: false,
   loading: () => (
     <div className="flex items-center justify-center h-64">
-      <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+      <Loader2 className="h-8 w-8 animate-spin text-emerald-700" />
     </div>
   ),
 });
@@ -22,7 +22,7 @@ const PdfFormFiller = dynamic(() => import("@/components/PdfFormFiller"), {
   ssr: false,
   loading: () => (
     <div className="flex items-center justify-center h-64">
-      <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+      <Loader2 className="h-8 w-8 animate-spin text-emerald-700" />
     </div>
   ),
 });
@@ -31,8 +31,10 @@ interface CandidateDocument {
   id: string;
   name: string;
   required: boolean;
+  documentAction: string;
   status: string;
   correctionNote?: string;
+  fieldValues?: Record<string, string>;
 }
 
 interface CandidateOnboarding {
@@ -48,7 +50,7 @@ interface CandidateOnboarding {
 
 const docStatusConfig: Record<string, { label: string; color: string; icon: React.ElementType }> = {
   pending: { label: "Pending", color: "bg-gray-100 text-gray-600", icon: Clock },
-  filled: { label: "Filled", color: "bg-blue-50 text-blue-600", icon: FileText },
+  filled: { label: "Filled", color: "bg-emerald-50 text-emerald-700", icon: FileText },
   signed: { label: "Signed", color: "bg-green-50 text-green-600", icon: CheckCircle },
   uploaded: { label: "Uploaded", color: "bg-indigo-50 text-indigo-600", icon: Upload },
   verified: { label: "Verified", color: "bg-emerald-50 text-emerald-600", icon: CheckCircle },
@@ -189,7 +191,7 @@ export default function CandidatePortalPage() {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+        <Loader2 className="h-8 w-8 animate-spin text-emerald-700" />
       </div>
     );
   }
@@ -260,7 +262,7 @@ export default function CandidatePortalPage() {
             </span>
             <div className="w-32 h-2 bg-gray-200 rounded-full overflow-hidden">
               <div
-                className="h-full bg-blue-600 rounded-full transition-all"
+                className="h-full bg-[#0e382b] rounded-full transition-all"
                 style={{
                   width: `${(completedDocs / onboarding.documents.length) * 100}%`,
                 }}
@@ -295,13 +297,16 @@ export default function CandidatePortalPage() {
             const ds = docStatusConfig[doc.status] || docStatusConfig.pending;
             const Icon = ds.icon;
             const isSigned = doc.status === "signed";
+            const isUploaded = doc.status === "uploaded";
             const needsAction = ["pending", "correction_requested"].includes(doc.status);
-            const needsUpload = doc.name.includes("License") || doc.name.includes("SSN") || doc.name.includes("Banking");
+            const action = doc.documentAction || "sign_and_return";
+            const isReadOnly = action === "read_only";
+            const isUploadOnly = action === "upload";
 
             return (
               <div
                 key={doc.id}
-                className="bg-white rounded-xl shadow-sm overflow-hidden"
+                className={`bg-white rounded-xl shadow-sm overflow-hidden ${isReadOnly ? "opacity-80" : ""}`}
               >
                 <div className="p-4 flex items-center gap-4">
                   <Icon className={`h-5 w-5 flex-shrink-0 ${ds.color.split(" ")[1]}`} />
@@ -310,44 +315,77 @@ export default function CandidatePortalPage() {
                       {doc.name}
                       {doc.required && <span className="text-red-500 ml-1">*</span>}
                     </p>
+                    <p className="text-xs text-gray-400 mt-0.5">
+                      {action === "sign_and_return" ? "Sign & Return" :
+                       action === "fill_sign_return" ? "Fill, Sign & Return" :
+                       action === "upload" ? "Upload Required" :
+                       "Read Only — No action needed"}
+                    </p>
                     {doc.correctionNote && (
                       <p className="text-xs text-red-500 mt-0.5">{doc.correctionNote}</p>
                     )}
-                    {isSigned && (
+                    {isSigned && !isReadOnly && (
                       <p className="text-xs text-green-600 mt-0.5">Signed and saved to PDF</p>
+                    )}
+                    {isUploaded && (
+                      <p className="text-xs text-indigo-600 mt-0.5">File uploaded</p>
                     )}
                   </div>
 
                   <div className="flex items-center gap-2 flex-shrink-0">
                     <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${ds.color}`}>
-                      {ds.label}
+                      {isReadOnly ? "Info" : ds.label}
                     </span>
 
-                    {/* View & Sign PDF button */}
-                    <button
-                      onClick={() => openDocument(doc)}
-                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
-                        needsAction
-                          ? "bg-blue-600 text-white hover:bg-blue-700"
-                          : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                      }`}
-                    >
-                      <Eye className="h-3.5 w-3.5" />
-                      {needsAction ? "View & Sign" : "View PDF"}
-                    </button>
-
-                    {/* Upload button for identity/banking docs */}
-                    {needsUpload && needsAction && (
+                    {/* Read Only: just view */}
+                    {isReadOnly && (
                       <button
-                        onClick={() => {
-                          setUploadDocId(doc.id);
-                          fileInputRef.current?.click();
-                        }}
-                        disabled={actionLoading}
+                        onClick={() => openDocument(doc)}
                         className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors"
                       >
-                        <Upload className="h-3.5 w-3.5" />
-                        Upload
+                        <Eye className="h-3.5 w-3.5" />
+                        Read
+                      </button>
+                    )}
+
+                    {/* Upload Only: upload button */}
+                    {isUploadOnly && (
+                      <>
+                        <button
+                          onClick={() => openDocument(doc)}
+                          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors"
+                        >
+                          <Eye className="h-3.5 w-3.5" />
+                          View
+                        </button>
+                        {needsAction && (
+                          <button
+                            onClick={() => {
+                              setUploadDocId(doc.id);
+                              fileInputRef.current?.click();
+                            }}
+                            disabled={actionLoading}
+                            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-[#0e382b] text-white hover:bg-[#18471c] transition-colors"
+                          >
+                            <Upload className="h-3.5 w-3.5" />
+                            Upload
+                          </button>
+                        )}
+                      </>
+                    )}
+
+                    {/* Sign & Return or Fill/Sign/Return: view & sign */}
+                    {!isReadOnly && !isUploadOnly && (
+                      <button
+                        onClick={() => openDocument(doc)}
+                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+                          needsAction
+                            ? "bg-[#0e382b] text-white hover:bg-[#18471c]"
+                            : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                        }`}
+                      >
+                        <Eye className="h-3.5 w-3.5" />
+                        {needsAction ? "View & Sign" : "View PDF"}
                       </button>
                     )}
                   </div>
@@ -379,17 +417,27 @@ export default function CandidatePortalPage() {
       </div>
 
       {/* PDF Viewer Overlay */}
-      {viewingDoc && !loadingFields && docFormFields.length > 0 && (
+      {viewingDoc && !loadingFields && viewingDoc.documentAction === "read_only" && (
+        <PdfSignViewer
+          pdfUrl={`/api/candidate/${token}/document/${viewingDoc.id}/pdf`}
+          documentName={viewingDoc.name}
+          isSigned={true}
+          onSign={() => Promise.resolve()}
+          onClose={() => setViewingDoc(null)}
+        />
+      )}
+      {viewingDoc && !loadingFields && viewingDoc.documentAction !== "read_only" && docFormFields.length > 0 && (
         <PdfFormFiller
           pdfUrl={`/api/candidate/${token}/document/${viewingDoc.id}/pdf`}
           documentName={viewingDoc.name}
           isSigned={viewingDoc.status === "signed"}
           formFields={docFormFields}
+          initialFieldValues={viewingDoc.fieldValues}
           onSubmit={(data) => handleFillAndSign(viewingDoc.id, data)}
           onClose={() => { setViewingDoc(null); setDocFormFields([]); }}
         />
       )}
-      {viewingDoc && !loadingFields && docFormFields.length === 0 && (
+      {viewingDoc && !loadingFields && viewingDoc.documentAction !== "read_only" && docFormFields.length === 0 && (
         <PdfSignViewer
           pdfUrl={`/api/candidate/${token}/document/${viewingDoc.id}/pdf`}
           documentName={viewingDoc.name}

@@ -2,16 +2,16 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { useAuthFetch } from "@/context/AuthContext";
+import { useAuth, useAuthFetch } from "@/context/AuthContext";
 import {
   ArrowLeft, Send, CheckCircle, Clock, AlertCircle, FileText,
-  RefreshCw, Eye, Download, MessageSquare, Loader2
+  RefreshCw, Eye, Download, MessageSquare, Loader2, FolderDown
 } from "lucide-react";
 import type { Onboarding, AuditLog } from "@/lib/types";
 
 const statusConfig: Record<string, { label: string; color: string; icon: React.ElementType }> = {
   initiated: { label: "Initiated", color: "bg-gray-100 text-gray-700", icon: Clock },
-  sent: { label: "Sent", color: "bg-blue-100 text-blue-700", icon: Send },
+  sent: { label: "Sent", color: "bg-emerald-100 text-emerald-800", icon: Send },
   in_progress: { label: "In Progress", color: "bg-yellow-100 text-yellow-700", icon: Clock },
   submitted: { label: "Submitted", color: "bg-purple-100 text-purple-700", icon: AlertCircle },
   verified: { label: "Verified", color: "bg-green-100 text-green-700", icon: CheckCircle },
@@ -20,7 +20,7 @@ const statusConfig: Record<string, { label: string; color: string; icon: React.E
 
 const docStatusConfig: Record<string, { label: string; color: string }> = {
   pending: { label: "Pending", color: "text-gray-500 bg-gray-100" },
-  filled: { label: "Filled", color: "text-blue-600 bg-blue-50" },
+  filled: { label: "Filled", color: "text-emerald-700 bg-emerald-50" },
   signed: { label: "Signed", color: "text-green-600 bg-green-50" },
   uploaded: { label: "Uploaded", color: "text-indigo-600 bg-indigo-50" },
   verified: { label: "Verified", color: "text-emerald-600 bg-emerald-50" },
@@ -30,15 +30,20 @@ const docStatusConfig: Record<string, { label: string; color: string }> = {
 export default function OnboardingDetailPage() {
   const { id } = useParams();
   const router = useRouter();
+  const { token } = useAuth();
   const authFetch = useAuthFetch();
   const [onboarding, setOnboarding] = useState<Onboarding | null>(null);
   const [auditLogs, setAuditLogs] = useState<AuditLog[]>([]);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
-  const [correctionDocId, setCorrectionDocId] = useState<string | null>(null);
+  const [showCorrectionModal, setShowCorrectionModal] = useState(false);
+  const [correctionDocIds, setCorrectionDocIds] = useState<string[]>([]);
   const [correctionNote, setCorrectionNote] = useState("");
   const [showAudit, setShowAudit] = useState(false);
   const [sendResult, setSendResult] = useState<string | null>(null);
+  const [viewingPdfUrl, setViewingPdfUrl] = useState<string | null>(null);
+  const [viewingDocName, setViewingDocName] = useState("");
+  const [downloading, setDownloading] = useState(false);
 
   async function loadData() {
     const [obData, auditData] = await Promise.all([
@@ -60,7 +65,16 @@ export default function OnboardingDetailPage() {
       method: "POST",
     });
     if (res.success) {
-      setSendResult(res.data.link);
+      const { link, shortLink, emailSent, compose } = res.data;
+      setSendResult(link);
+
+      if (!emailSent && compose) {
+        // Outlook compose deeplink renders body as plain text
+        const body = `Good Morning ${compose.candidateName},\n\nCongratulations & welcome aboard!\n\nPlease see the attached paperwork. If you are in agreement with the terms, complete and sign the onboarding documents as soon as possible.\n\nOnboarding Link: ${shortLink}\n\nNOTE: Send a copy of your driver's license, social security card, professional photo with a white background for ID badge, void check and certifications you held`;
+        const outlookUrl = `https://outlook.office.com/mail/deeplink/compose?to=${encodeURIComponent(compose.to)}&subject=${encodeURIComponent(compose.subject)}&body=${encodeURIComponent(body)}`;
+        window.open(outlookUrl, "_blank");
+      }
+
       await loadData();
     }
     setActionLoading(false);
@@ -77,16 +91,26 @@ export default function OnboardingDetailPage() {
   };
 
   const handleCorrection = async () => {
-    if (!correctionDocId || !correctionNote) return;
+    if (correctionDocIds.length === 0 || !correctionNote) return;
     setActionLoading(true);
-    await authFetch(`/api/onboarding/${id}/request-correction`, {
+    const res = await authFetch(`/api/onboarding/${id}/request-correction`, {
       method: "POST",
       body: JSON.stringify({
-        documentId: correctionDocId,
+        documentIds: correctionDocIds,
         note: correctionNote,
       }),
     });
-    setCorrectionDocId(null);
+
+    if (res.success && !res.data.emailSent && res.data.compose) {
+      const c = res.data.compose;
+      const docList = c.documentNames.map((n: string, i: number) => `  ${i + 1}. ${n}`).join("\n");
+      const body = `Dear ${c.candidateName},\n\nThe HR team at ${c.companyName} has reviewed your submission and requested corrections on the following document${c.documentNames.length > 1 ? "s" : ""}:\n\n${docList}\n\nRemarks: ${c.note}\n\nPlease use the link below to review and resubmit:\n\n${c.link}`;
+      const outlookUrl = `https://outlook.office.com/mail/deeplink/compose?to=${encodeURIComponent(c.to)}&subject=${encodeURIComponent(res.data.compose.subject)}&body=${encodeURIComponent(body)}`;
+      window.open(outlookUrl, "_blank");
+    }
+
+    setShowCorrectionModal(false);
+    setCorrectionDocIds([]);
     setCorrectionNote("");
     await loadData();
     setActionLoading(false);
@@ -141,7 +165,7 @@ export default function OnboardingDetailPage() {
             <button
               onClick={handleSend}
               disabled={actionLoading}
-              className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50 flex items-center gap-2"
+              className="bg-[#0e382b] text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-[#18471c] disabled:opacity-50 flex items-center gap-2"
             >
               {actionLoading ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
@@ -171,6 +195,32 @@ export default function OnboardingDetailPage() {
               <CheckCircle className="h-4 w-4" /> Mark Complete
             </button>
           )}
+          {(onboarding.status === "completed" || onboarding.status === "verified") && (
+            <button
+              onClick={async () => {
+                setDownloading(true);
+                try {
+                  const res = await fetch(`/api/onboarding/${id}/download`, {
+                    headers: { Authorization: `Bearer ${token}` },
+                  });
+                  if (!res.ok) throw new Error("Download failed");
+                  const blob = await res.blob();
+                  const url = URL.createObjectURL(blob);
+                  const a = document.createElement("a");
+                  a.href = url;
+                  a.download = `${onboarding.candidate.name} - Onboarding Documents.zip`;
+                  a.click();
+                  URL.revokeObjectURL(url);
+                } catch { /* ignore */ }
+                setDownloading(false);
+              }}
+              disabled={downloading}
+              className="bg-[#0e382b] text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-[#18471c] disabled:opacity-50 flex items-center gap-2"
+            >
+              {downloading ? <Loader2 className="h-4 w-4 animate-spin" /> : <FolderDown className="h-4 w-4" />}
+              Download All (ZIP)
+            </button>
+          )}
           <button
             onClick={() => setShowAudit(!showAudit)}
             className="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 flex items-center gap-2"
@@ -186,9 +236,9 @@ export default function OnboardingDetailPage() {
         </div>
 
         {sendResult && (
-          <div className="mt-4 p-3 bg-blue-50 rounded-lg">
-            <p className="text-sm text-blue-800 font-medium">Onboarding link sent!</p>
-            <p className="text-xs text-blue-600 mt-1 break-all">{sendResult}</p>
+          <div className="mt-4 p-3 bg-emerald-50 rounded-lg">
+            <p className="text-sm text-emerald-900 font-medium">Onboarding link sent!</p>
+            <p className="text-xs text-emerald-700 mt-1 break-all">{sendResult}</p>
           </div>
         )}
       </div>
@@ -206,12 +256,12 @@ export default function OnboardingDetailPage() {
               <div key={key} className="flex items-center flex-1">
                 <div
                   className={`h-3 w-3 rounded-full ${
-                    isPast || isActive ? "bg-blue-600" : "bg-gray-200"
+                    isPast || isActive ? "bg-[#0e382b]" : "bg-gray-200"
                   }`}
                 />
                 <span
                   className={`ml-1.5 text-xs font-medium hidden sm:inline ${
-                    isActive ? "text-blue-700" : isPast ? "text-gray-700" : "text-gray-400"
+                    isActive ? "text-emerald-800" : isPast ? "text-gray-700" : "text-gray-400"
                   }`}
                 >
                   {val.label}
@@ -219,7 +269,7 @@ export default function OnboardingDetailPage() {
                 {i < arr.length - 1 && (
                   <div
                     className={`flex-1 h-0.5 mx-2 ${
-                      isPast ? "bg-blue-600" : "bg-gray-200"
+                      isPast ? "bg-[#0e382b]" : "bg-gray-200"
                     }`}
                   />
                 )}
@@ -231,10 +281,23 @@ export default function OnboardingDetailPage() {
 
       {/* Documents */}
       <div className="bg-white rounded-xl border border-gray-200">
-        <div className="px-6 py-4 border-b border-gray-100">
+        <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
           <h3 className="font-semibold text-gray-900">
             Documents ({onboarding.documents.length})
           </h3>
+          {onboarding.status === "submitted" && (
+            <button
+              onClick={() => {
+                setShowCorrectionModal(true);
+                setCorrectionDocIds([]);
+                setCorrectionNote("");
+              }}
+              className="bg-red-50 text-red-600 px-3 py-1.5 rounded-lg text-xs font-medium hover:bg-red-100 flex items-center gap-1.5"
+            >
+              <MessageSquare className="h-3.5 w-3.5" />
+              Request Corrections
+            </button>
+          )}
         </div>
         <div className="divide-y divide-gray-100">
           {onboarding.documents.map((doc) => {
@@ -244,6 +307,13 @@ export default function OnboardingDetailPage() {
                 <FileText className="h-5 w-5 text-gray-400 flex-shrink-0" />
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-gray-900">{doc.name}</p>
+                  <p className="text-xs text-gray-400 mt-0.5">
+                    {(doc as any).documentAction === "sign_and_return" ? "Sign & Return" :
+                     (doc as any).documentAction === "fill_sign_return" ? "Fill, Sign & Return" :
+                     (doc as any).documentAction === "upload" ? "Upload Only" :
+                     (doc as any).documentAction === "read_only" ? "Read Only" :
+                     "Sign & Return"}
+                  </p>
                   {doc.correctionNote && (
                     <p className="text-xs text-red-500 mt-0.5">
                       Note: {doc.correctionNote}
@@ -259,16 +329,56 @@ export default function OnboardingDetailPage() {
                 <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${ds.color}`}>
                   {ds.label}
                 </span>
-                {onboarding.status === "submitted" && (
+                <button
+                  onClick={async () => {
+                    const res = await fetch(
+                      `/api/onboarding/${id}/document/${doc.id}/pdf`,
+                      { headers: { Authorization: `Bearer ${token}` } }
+                    );
+                    if (res.ok) {
+                      const blob = await res.blob();
+                      setViewingPdfUrl(URL.createObjectURL(blob));
+                      setViewingDocName(doc.name);
+                    }
+                  }}
+                  className="text-emerald-700 hover:text-emerald-900"
+                  title="View PDF"
+                >
+                  <Eye className="h-4 w-4" />
+                </button>
+                <button
+                  onClick={async () => {
+                    const res = await fetch(
+                      `/api/onboarding/${id}/document/${doc.id}/pdf`,
+                      { headers: { Authorization: `Bearer ${token}` } }
+                    );
+                    if (res.ok) {
+                      const blob = await res.blob();
+                      const url = URL.createObjectURL(blob);
+                      const a = document.createElement("a");
+                      a.href = url;
+                      a.download = `${doc.name}.pdf`;
+                      a.click();
+                      URL.revokeObjectURL(url);
+                    }
+                  }}
+                  className="text-gray-400 hover:text-gray-600"
+                  title="Download PDF"
+                >
+                  <Download className="h-4 w-4" />
+                </button>
+                {doc.status === "correction_requested" && (
                   <button
                     onClick={() => {
-                      setCorrectionDocId(doc.id);
-                      setCorrectionNote("");
+                      setShowCorrectionModal(true);
+                      setCorrectionDocIds([doc.id]);
+                      setCorrectionNote(doc.correctionNote || "");
                     }}
-                    className="text-xs text-red-500 hover:text-red-700"
-                    title="Request correction"
+                    className="text-xs bg-amber-50 text-amber-700 px-2.5 py-1 rounded-lg font-medium hover:bg-amber-100 flex items-center gap-1"
+                    title="Resend correction email"
                   >
-                    <MessageSquare className="h-4 w-4" />
+                    <RefreshCw className="h-3 w-3" />
+                    Resend
                   </button>
                 )}
               </div>
@@ -277,35 +387,99 @@ export default function OnboardingDetailPage() {
         </div>
       </div>
 
+      {/* PDF Viewer Modal */}
+      {viewingPdfUrl && (
+        <div className="fixed inset-0 z-50 bg-black/60 flex flex-col">
+          <div className="bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between flex-shrink-0">
+            <h3 className="font-semibold text-gray-900 text-sm truncate">
+              {viewingDocName}
+            </h3>
+            <button
+              onClick={() => {
+                URL.revokeObjectURL(viewingPdfUrl);
+                setViewingPdfUrl(null);
+              }}
+              className="text-gray-500 hover:text-gray-700 text-sm font-medium"
+            >
+              Close ✕
+            </button>
+          </div>
+          <div className="flex-1 bg-gray-100">
+            <iframe
+              src={viewingPdfUrl}
+              className="w-full h-full"
+              title={viewingDocName}
+            />
+          </div>
+        </div>
+      )}
+
       {/* Correction modal */}
-      {correctionDocId && (
+      {showCorrectionModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
           <div className="bg-white rounded-xl p-6 w-full max-w-md mx-4 shadow-xl">
-            <h3 className="font-semibold text-gray-900 mb-3">
-              Request Correction
+            <h3 className="font-semibold text-gray-900 mb-1">
+              Request Corrections
             </h3>
-            <p className="text-sm text-gray-500 mb-3">
-              For:{" "}
-              {onboarding.documents.find((d) => d.id === correctionDocId)?.name}
+            <p className="text-sm text-gray-500 mb-4">
+              Select the documents that need corrections and add your remarks.
             </p>
+
+            {/* Document checkboxes */}
+            <div className="space-y-2 mb-4 max-h-48 overflow-auto">
+              {onboarding.documents.map((doc) => (
+                <label
+                  key={doc.id}
+                  className={`flex items-center gap-3 p-2.5 rounded-lg border cursor-pointer transition-colors ${
+                    correctionDocIds.includes(doc.id)
+                      ? "border-red-300 bg-red-50"
+                      : "border-gray-200 hover:bg-gray-50"
+                  }`}
+                >
+                  <input
+                    type="checkbox"
+                    checked={correctionDocIds.includes(doc.id)}
+                    onChange={(e) => {
+                      if (e.target.checked) {
+                        setCorrectionDocIds((prev) => [...prev, doc.id]);
+                      } else {
+                        setCorrectionDocIds((prev) =>
+                          prev.filter((id) => id !== doc.id)
+                        );
+                      }
+                    }}
+                    className="h-4 w-4 rounded border-gray-300 text-red-600 focus:ring-red-500"
+                  />
+                  <span className="text-sm text-gray-900">{doc.name}</span>
+                  <span className={`ml-auto text-xs px-2 py-0.5 rounded-full ${
+                    (docStatusConfig[doc.status] || docStatusConfig.pending).color
+                  }`}>
+                    {(docStatusConfig[doc.status] || docStatusConfig.pending).label}
+                  </span>
+                </label>
+              ))}
+            </div>
+
+            {/* Remarks */}
             <textarea
               value={correctionNote}
               onChange={(e) => setCorrectionNote(e.target.value)}
               placeholder="Describe what needs to be corrected..."
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none h-24 resize-none"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-red-500 outline-none h-24 resize-none"
             />
             <div className="flex justify-end gap-2 mt-4">
               <button
-                onClick={() => setCorrectionDocId(null)}
+                onClick={() => setShowCorrectionModal(false)}
                 className="px-3 py-1.5 text-sm text-gray-600 hover:text-gray-900"
               >
                 Cancel
               </button>
               <button
                 onClick={handleCorrection}
-                disabled={!correctionNote || actionLoading}
-                className="bg-red-600 text-white px-4 py-1.5 rounded-lg text-sm font-medium hover:bg-red-700 disabled:opacity-50"
+                disabled={correctionDocIds.length === 0 || !correctionNote || actionLoading}
+                className="bg-red-600 text-white px-4 py-1.5 rounded-lg text-sm font-medium hover:bg-red-700 disabled:opacity-50 flex items-center gap-2"
               >
+                {actionLoading && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
                 Send Correction Request
               </button>
             </div>

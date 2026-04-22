@@ -17,6 +17,7 @@ export default function TemplatesPage() {
     category: "compliance" as DocumentTemplate["category"],
     companyId: "",
     templateType: "pdf" as "pdf" | "html",
+    documentAction: "sign_and_return" as DocumentTemplate["documentAction"],
     uploadRequired: false,
   });
 
@@ -51,13 +52,21 @@ export default function TemplatesPage() {
     });
     if (res.success) {
       setShowForm(false);
-      setForm({ name: "", category: "compliance", companyId: form.companyId, templateType: "pdf", uploadRequired: false });
+      setForm({ name: "", category: "compliance", companyId: form.companyId, templateType: "pdf", documentAction: "sign_and_return", uploadRequired: false });
       loadData();
     }
   };
 
   const handleDelete = async (id: string) => {
     await authFetch(`/api/templates/${id}`, { method: "DELETE" });
+    loadData();
+  };
+
+  const handleUpdateAction = async (id: string, documentAction: string) => {
+    await authFetch(`/api/templates/${id}`, {
+      method: "PUT",
+      body: JSON.stringify({ documentAction, uploadRequired: documentAction === "upload" }),
+    });
     loadData();
   };
 
@@ -83,7 +92,7 @@ export default function TemplatesPage() {
         <h2 className="text-xl font-bold text-gray-900">Document Templates</h2>
         <button
           onClick={() => setShowForm(!showForm)}
-          className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 flex items-center gap-2"
+          className="bg-[#0e382b] text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-[#18471c] flex items-center gap-2"
         >
           <Plus className="h-4 w-4" />
           Add Template
@@ -136,6 +145,21 @@ export default function TemplatesPage() {
                 ))}
               </select>
             </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Document Action
+              </label>
+              <select
+                value={form.documentAction}
+                onChange={(e) => setForm({ ...form, documentAction: e.target.value as DocumentTemplate["documentAction"], uploadRequired: e.target.value === "upload" })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+              >
+                <option value="sign_and_return">Sign & Return</option>
+                <option value="fill_sign_return">Fill, Sign & Return</option>
+                <option value="upload">Upload Only</option>
+                <option value="read_only">Read Only (Instructions)</option>
+              </select>
+            </div>
             <div className="flex items-end gap-4">
               <label className="flex items-center gap-2 cursor-pointer">
                 <input
@@ -152,7 +176,7 @@ export default function TemplatesPage() {
             <button
               onClick={handleCreate}
               disabled={!form.name}
-              className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50"
+              className="bg-[#0e382b] text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-[#18471c] disabled:opacity-50"
             >
               Create Template
             </button>
@@ -181,7 +205,6 @@ export default function TemplatesPage() {
                   <p className="font-medium text-gray-900">{t.name}</p>
                   <p className="text-xs text-gray-500 mt-0.5">
                     {t.templateType.toUpperCase()}
-                    {t.uploadRequired ? " · Upload required" : ""}
                   </p>
                 </div>
               </div>
@@ -193,6 +216,19 @@ export default function TemplatesPage() {
                 <Trash2 className="h-4 w-4" />
               </button>
             </div>
+            <div className="mt-3">
+              <label className="block text-xs font-medium text-gray-500 mb-1">Action Type</label>
+              <select
+                value={t.documentAction || "sign_and_return"}
+                onChange={(e) => handleUpdateAction(t.id, e.target.value)}
+                className="w-full px-2.5 py-1.5 border border-gray-200 rounded-lg text-xs focus:ring-2 focus:ring-emerald-500 outline-none bg-gray-50"
+              >
+                <option value="sign_and_return">Sign &amp; Return</option>
+                <option value="fill_sign_return">Fill, Sign &amp; Return</option>
+                <option value="upload">Upload Only</option>
+                <option value="read_only">Read Only (Instructions)</option>
+              </select>
+            </div>
             <div className="mt-3 flex items-center justify-between">
               <span
                 className={`inline-block text-xs font-medium px-2.5 py-1 rounded-full capitalize ${
@@ -203,7 +239,7 @@ export default function TemplatesPage() {
               </span>
               <Link
                 href={`/dashboard/templates/${t.id}/design`}
-                className="text-xs font-medium text-blue-600 hover:text-blue-800 flex items-center gap-1"
+                className="text-xs font-medium text-emerald-700 hover:text-emerald-900 flex items-center gap-1"
               >
                 <PenTool className="h-3.5 w-3.5" />
                 Design Fields

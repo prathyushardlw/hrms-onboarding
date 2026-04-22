@@ -61,13 +61,15 @@ export async function POST(req: NextRequest) {
     const documents: OnboardingDocument[] = documentTemplateIds.map(
       (templateId) => {
         const template = templatesStore.getById(templateId);
+        const action = template?.documentAction || "sign_and_return";
         return {
           id: uuidv4(),
           templateId,
           name: template?.name || "Unknown Document",
-          required: true,
+          required: action !== "read_only",
           uploadRequired: template?.uploadRequired ?? false,
-          status: "pending" as const,
+          documentAction: action,
+          status: action === "read_only" ? "signed" as const : "pending" as const,
         };
       }
     );
@@ -78,7 +80,10 @@ export async function POST(req: NextRequest) {
     const onboarding: Onboarding = {
       id: uuidv4(),
       companyId: data.companyId,
-      candidate: data.candidate,
+      candidate: {
+        ...data.candidate,
+        name: `${data.candidate.firstName} ${data.candidate.lastName}`,
+      },
       employmentType: data.employmentType,
       department: data.department,
       designation: data.designation,

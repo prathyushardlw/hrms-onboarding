@@ -28,7 +28,7 @@ export async function seedData() {
   // ---- Company ----
   const company: Company = {
     id: uuidv4(),
-    name: "Acme Corporation",
+    name: "MLX",
     createdAt: now,
     updatedAt: now,
   };
@@ -37,8 +37,8 @@ export async function seedData() {
   // ---- Admin user ----
   const adminUser: User = {
     id: uuidv4(),
-    name: "HR Admin",
-    email: "admin@acme.com",
+    name: "MLX Admin",
+    email: "admin@mlx.com",
     passwordHash: await hashPassword("password123"),
     role: "admin",
     companyId: company.id,

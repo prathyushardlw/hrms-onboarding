@@ -35,7 +35,7 @@ export default function DashboardPage() {
   };
 
   const statCards = [
-    { label: "Total Onboardings", value: stats.total, icon: Users, color: "text-blue-600 bg-blue-50" },
+    { label: "Total Onboardings", value: stats.total, icon: Users, color: "text-[#0e382b] bg-emerald-50" },
     { label: "In Progress", value: stats.inProgress, icon: Clock, color: "text-yellow-600 bg-yellow-50" },
     { label: "Awaiting Review", value: stats.submitted, icon: AlertCircle, color: "text-purple-600 bg-purple-50" },
     { label: "Completed", value: stats.completed, icon: CheckCircle, color: "text-green-600 bg-green-50" },
@@ -44,7 +44,7 @@ export default function DashboardPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" />
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-600" />
       </div>
     );
   }
@@ -55,7 +55,7 @@ export default function DashboardPage() {
         <h2 className="text-xl font-bold text-gray-900">Dashboard</h2>
         <Link
           href="/dashboard/onboarding/new"
-          className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"
+          className="bg-[#0e382b] text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-[#18471c] transition-colors"
         >
           + New Onboarding
         </Link>
@@ -136,7 +136,7 @@ export default function DashboardPage() {
                       <td className="px-5 py-3">
                         <Link
                           href={`/dashboard/onboarding/${onboarding.id}`}
-                          className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+                          className="text-emerald-700 hover:text-emerald-900 text-sm font-medium"
                         >
                           View
                         </Link>

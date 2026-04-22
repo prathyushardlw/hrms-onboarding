@@ -8,7 +8,7 @@ import type { Onboarding, OnboardingStatus } from "@/lib/types";
 
 const statusConfig: Record<string, { label: string; color: string }> = {
   initiated: { label: "Initiated", color: "bg-gray-100 text-gray-700" },
-  sent: { label: "Sent", color: "bg-blue-100 text-blue-700" },
+  sent: { label: "Sent", color: "bg-emerald-100 text-emerald-800" },
   in_progress: { label: "In Progress", color: "bg-yellow-100 text-yellow-700" },
   submitted: { label: "Submitted", color: "bg-purple-100 text-purple-700" },
   verified: { label: "Verified", color: "bg-green-100 text-green-700" },
@@ -49,7 +49,7 @@ export default function OnboardingListPage() {
         <h2 className="text-xl font-bold text-gray-900">Onboardings</h2>
         <Link
           href="/dashboard/onboarding/new"
-          className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors flex items-center gap-2"
+          className="bg-[#0e382b] text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-[#18471c] transition-colors flex items-center gap-2"
         >
           <Plus className="h-4 w-4" />
           Initiate Onboarding
@@ -65,13 +65,13 @@ export default function OnboardingListPage() {
             placeholder="Search by name, email, department..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none"
           />
         </div>
         <select
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
-          className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+          className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none"
         >
           <option value="all">All Statuses</option>
           {Object.entries(statusConfig).map(([key, val]) => (
@@ -134,7 +134,7 @@ export default function OnboardingListPage() {
                       <td className="px-5 py-3">
                         <Link
                           href={`/dashboard/onboarding/${o.id}`}
-                          className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+                          className="text-emerald-700 hover:text-emerald-900 text-sm font-medium"
                         >
                           View
                         </Link>

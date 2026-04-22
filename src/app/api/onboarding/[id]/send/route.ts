@@ -31,11 +31,16 @@ export async function POST(
     companyName
   );
 
-  await sendEmail({
-    to: onboarding.candidate.email,
-    subject,
-    html,
-  });
+  let emailSent = false;
+  try {
+    emailSent = await sendEmail({
+      to: onboarding.candidate.email,
+      subject,
+      html,
+    });
+  } catch (err) {
+    console.error("SMTP send failed, falling back to web compose:", err);
+  }
 
   onboardingsStore.update(id, {
     status: "sent",
@@ -49,5 +54,18 @@ export async function POST(
     metadata: { email: onboarding.candidate.email },
   });
 
-  return ok({ message: "Onboarding package sent", link: onboardingLink });
+  return ok({
+    message: emailSent
+      ? "Onboarding package sent via email"
+      : "Email service unavailable — use the compose link to send manually",
+    link: onboardingLink,
+    shortLink: `${appUrl}/r/${id}`,
+    emailSent,
+    compose: {
+      to: onboarding.candidate.email,
+      subject,
+      candidateName: onboarding.candidate.name,
+      companyName,
+    },
+  });
 }
