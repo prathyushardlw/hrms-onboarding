@@ -71,6 +71,20 @@ export interface TemplatePlaceholder {
   source: string; // e.g. "candidate.name", "onboarding.joiningDate"
 }
 
+export interface PdfFormField {
+  id: string;
+  label: string;
+  type: "text" | "checkbox" | "ssn" | "ein";
+  page: number;       // 0-indexed page number
+  x: number;          // x position in PDF points (from left)
+  y: number;          // y position in PDF points (from bottom)
+  width: number;      // width in PDF points
+  height: number;     // height in PDF points
+  group?: string;     // for radio-like checkbox groups (e.g. "taxClassification")
+  defaultValue?: string;
+  fontSize?: number;
+}
+
 export interface DocumentTemplate {
   id: string;
   companyId: string;
@@ -80,6 +94,7 @@ export interface DocumentTemplate {
   templateType: "pdf" | "html";
   placeholders: TemplatePlaceholder[];
   signatureFields: SignatureField[];
+  formFields?: PdfFormField[];
   uploadRequired: boolean;
   isActive: boolean;
   createdAt: string;

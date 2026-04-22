@@ -44,7 +44,18 @@ export default function NewOnboardingPage() {
       if (compData.success) {
         setCompanies(compData.data);
         if (compData.data.length > 0 && !form.companyId) {
-          setForm((f) => ({ ...f, companyId: compData.data[0].id }));
+          const companyId = compData.data[0].id;
+          setForm((f) => ({ ...f, companyId }));
+
+          // Pre-select docs immediately since docRules state isn't set yet
+          if (rulesData.success) {
+            const rule = rulesData.data.find(
+              (r: EmployeeTypeDocRule) => r.companyId === companyId && r.employmentType === form.employmentType
+            );
+            if (rule) {
+              setSelectedDocs(new Set([...rule.requiredDocuments, ...rule.optionalDocuments]));
+            }
+          }
         }
       }
       if (templData.success) setTemplates(templData.data);

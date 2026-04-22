@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import { onboardingsStore } from "@/lib/store";
+import { onboardingsStore, templatesStore, getTemplatesDir } from "@/lib/store";
 import { generateDocumentPdf } from "@/lib/pdf-generator";
 import { logAuditEvent } from "@/lib/audit";
 import fs from "fs";
+import path from "path";
 
 function getOnboardingByToken(token: string) {
   const results = onboardingsStore.find((o) => o.accessToken === token);
@@ -55,6 +56,21 @@ export async function GET(
         "Content-Disposition": `inline; filename="${doc.name}.pdf"`,
       },
     });
+  }
+
+  // Check if there's a real template PDF file on disk
+  const template = templatesStore.find((t) => t.id === doc.templateId)[0];
+  if (template?.fileName) {
+    const templatePath = path.join(getTemplatesDir(), template.fileName);
+    if (fs.existsSync(templatePath)) {
+      const templateBytes = fs.readFileSync(templatePath);
+      return new NextResponse(templateBytes, {
+        headers: {
+          "Content-Type": "application/pdf",
+          "Content-Disposition": `inline; filename="${doc.name}.pdf"`,
+        },
+      });
+    }
   }
 
   // Otherwise generate fresh PDF from template data

@@ -50,6 +50,7 @@
     "concurrently": "^9.2.1",
     "eslint": "^9",
     "eslint-config-next": "16.2.4",
+    "pdf-parse": "^2.4.5",
     "tailwindcss": "^4",
     "ts-node": "^10.9.2",
     "typescript": "^5"

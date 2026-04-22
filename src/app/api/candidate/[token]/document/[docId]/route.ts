@@ -1,15 +1,11 @@
 import { NextRequest } from "next/server";
-import { onboardingsStore, saveUploadedFile } from "@/lib/store";
+import { onboardingsStore, saveUploadedFile, templatesStore, getTemplatesDir } from "@/lib/store";
 import { logAuditEvent } from "@/lib/audit";
-<<<<<<< HEAD
-=======
-import { saveUploadedFile } from "@/lib/store";
-import { generateDocumentPdf, embedSignatureInPdf } from "@/lib/pdf-generator";
->>>>>>> 5ee52b558ebf2a59190ff98d27e70362dd621648
 import { ok, notFound, badRequest } from "@/lib/api-helpers";
-import { generateDocumentPdf, embedSignatureInPdf } from "@/lib/pdf-generator";
+import { generateDocumentPdf, embedSignatureInPdf, embedFormFieldsInPdf } from "@/lib/pdf-generator";
 import { v4 as uuidv4 } from "uuid";
 import fs from "fs";
+import path from "path";
 import type { OnboardingDocument } from "@/lib/types";
 
 function getOnboardingByToken(token: string) {
@@ -59,16 +55,33 @@ export async function POST(
     }
 
     if (action === "sign" && signatureData) {
-      // Get the current PDF (filled or generate fresh)
+      // Get the current PDF — check for real template file first
       let pdfBytes: Uint8Array;
-      if (doc.filledFileUrl && fs.existsSync(doc.filledFileUrl)) {
+      const template = templatesStore.find((t) => t.id === doc.templateId)[0];
+
+      if (doc.signedFileUrl && fs.existsSync(doc.signedFileUrl)) {
+        pdfBytes = new Uint8Array(fs.readFileSync(doc.signedFileUrl));
+      } else if (doc.filledFileUrl && fs.existsSync(doc.filledFileUrl)) {
         pdfBytes = new Uint8Array(fs.readFileSync(doc.filledFileUrl));
+      } else if (template?.fileName) {
+        const templatePath = path.join(getTemplatesDir(), template.fileName);
+        if (fs.existsSync(templatePath)) {
+          pdfBytes = new Uint8Array(fs.readFileSync(templatePath));
+        } else {
+          pdfBytes = await generateDocumentPdf(onboarding, doc);
+        }
       } else {
         pdfBytes = await generateDocumentPdf(onboarding, doc);
       }
 
+      // Use signature position from template if available
+      const sigField = template?.signatureFields?.find((f) => f.role === "candidate");
+      const sigPosition = sigField
+        ? { page: sigField.page, x: sigField.x, y: sigField.y, width: sigField.width, height: sigField.height }
+        : undefined;
+
       // Embed the signature image into the PDF
-      const signedPdfBytes = await embedSignatureInPdf(pdfBytes, signatureData);
+      const signedPdfBytes = await embedSignatureInPdf(pdfBytes, signatureData, sigPosition);
 
       // Save the signed PDF to disk
       const signedFileName = `${doc.name.replace(/\s+/g, "_")}_signed.pdf`;
@@ -100,11 +113,32 @@ export async function POST(
         ? JSON.parse(fieldValuesRaw)
         : {};
 
-      // Generate PDF with field values pre-filled
-      const pdfBytes = await generateDocumentPdf(onboarding, doc, fieldValues);
+      const templateForFill = templatesStore.find((t) => t.id === doc.templateId)[0];
+
+      // Get the base PDF — use real template file if available, else generate
+      let pdfBytes: Uint8Array;
+      if (templateForFill?.fileName) {
+        const templatePath = path.join(getTemplatesDir(), templateForFill.fileName);
+        if (fs.existsSync(templatePath)) {
+          pdfBytes = new Uint8Array(fs.readFileSync(templatePath));
+        } else {
+          pdfBytes = await generateDocumentPdf(onboarding, doc, fieldValues);
+        }
+      } else {
+        pdfBytes = await generateDocumentPdf(onboarding, doc, fieldValues);
+      }
+
+      // Embed form field values (text, checkmarks) onto the PDF
+      if (templateForFill?.formFields && templateForFill.formFields.length > 0) {
+        pdfBytes = await embedFormFieldsInPdf(pdfBytes, templateForFill.formFields, fieldValues);
+      }
 
       // Embed the signature image into the PDF
-      const signedBytes = await embedSignatureInPdf(pdfBytes, signatureData);
+      const fillSigField = templateForFill?.signatureFields?.find((f) => f.role === "candidate");
+      const fillSigPos = fillSigField
+        ? { page: fillSigField.page, x: fillSigField.x, y: fillSigField.y, width: fillSigField.width, height: fillSigField.height }
+        : undefined;
+      const signedBytes = await embedSignatureInPdf(pdfBytes, signatureData, fillSigPos);
 
       // Save to disk
       const fileName = `${doc.name.replace(/\s+/g, "_")}_signed_${uuidv4().slice(0, 8)}.pdf`;

@@ -3,7 +3,7 @@
 // For now, we generate simple PDFs with pdf-lib that look like real forms.
 
 import { PDFDocument, StandardFonts, rgb, PDFPage, PDFFont } from "pdf-lib";
-import type { Onboarding, OnboardingDocument, DocumentTemplate } from "./types";
+import type { Onboarding, OnboardingDocument, DocumentTemplate, PdfFormField } from "./types";
 import { templatesStore } from "./store";
 
 function drawField(
@@ -264,11 +264,19 @@ export async function generateDocumentPdf(
 
 export async function embedSignatureInPdf(
   existingPdfBytes: Uint8Array,
-  signatureDataUrl: string
+  signatureDataUrl: string,
+  position?: { page?: number; x?: number; y?: number; width?: number; height?: number }
 ): Promise<Uint8Array> {
   const pdfDoc = await PDFDocument.load(existingPdfBytes);
   const pages = pdfDoc.getPages();
-  const lastPage = pages[pages.length - 1];
+
+  // Determine which page and where to place the signature
+  const pageIndex = position?.page ?? pages.length - 1;
+  const targetPage = pages[Math.min(pageIndex, pages.length - 1)];
+  const boxX = position?.x ?? 40;
+  const boxY = position?.y ?? 70;
+  const boxW = position?.width ?? 250;
+  const boxH = position?.height ?? 80;
 
   // Decode the signature image from data URL
   const base64Data = signatureDataUrl.split(",")[1];
@@ -281,14 +289,14 @@ export async function embedSignatureInPdf(
     signatureImage = await pdfDoc.embedJpg(signatureBytes);
   }
 
-  // Scale to fit the signature box (250x80 at position 40,70)
+  // Scale to fit the target box
   const sigDims = signatureImage.scale(
-    Math.min(240 / signatureImage.width, 70 / signatureImage.height)
+    Math.min((boxW - 10) / signatureImage.width, (boxH - 10) / signatureImage.height)
   );
 
-  lastPage.drawImage(signatureImage, {
-    x: 45 + (240 - sigDims.width) / 2,
-    y: 75 + (70 - sigDims.height) / 2,
+  targetPage.drawImage(signatureImage, {
+    x: boxX + (boxW - sigDims.width) / 2,
+    y: boxY + (boxH - sigDims.height) / 2,
     width: sigDims.width,
     height: sigDims.height,
   });
@@ -336,4 +344,58 @@ function wrapText(text: string, font: PDFFont, fontSize: number, maxWidth: numbe
   }
   if (currentLine) lines.push(currentLine);
   return lines;
+}
+
+/**
+ * Embed filled form field values (text, checkmarks) into a PDF at specified positions.
+ * fieldValues is a map of field ID → value. "true" for checkboxes means checked.
+ */
+export async function embedFormFieldsInPdf(
+  existingPdfBytes: Uint8Array,
+  formFields: PdfFormField[],
+  fieldValues: Record<string, string>
+): Promise<Uint8Array> {
+  const pdfDoc = await PDFDocument.load(existingPdfBytes);
+  const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
+  const pages = pdfDoc.getPages();
+
+  for (const field of formFields) {
+    const value = fieldValues[field.id];
+    if (!value || !value.trim()) continue;
+
+    const page = pages[Math.min(field.page, pages.length - 1)];
+
+    if (field.type === "checkbox") {
+      if (value === "true") {
+        // Draw a checkmark (X) in the checkbox area
+        const cx = field.x + field.width / 2;
+        const cy = field.y + field.height / 2;
+        const s = Math.min(field.width, field.height) * 0.35;
+        page.drawLine({
+          start: { x: cx - s, y: cy - s },
+          end: { x: cx + s, y: cy + s },
+          thickness: 1.5,
+          color: rgb(0, 0, 0),
+        });
+        page.drawLine({
+          start: { x: cx - s, y: cy + s },
+          end: { x: cx + s, y: cy - s },
+          thickness: 1.5,
+          color: rgb(0, 0, 0),
+        });
+      }
+    } else {
+      // text / ssn / ein — draw the text at the field position
+      const fontSize = field.fontSize || 11;
+      page.drawText(value, {
+        x: field.x + 2,
+        y: field.y + (field.height - fontSize) / 2,
+        size: fontSize,
+        font,
+        color: rgb(0, 0, 0),
+      });
+    }
+  }
+
+  return pdfDoc.save();
 }

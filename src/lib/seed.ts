@@ -14,6 +14,7 @@ import type {
   User,
   DocumentTemplate,
   EmployeeTypeDocRule,
+  PdfFormField,
 } from "./types";
 
 export async function seedData() {
@@ -56,25 +57,63 @@ export async function seedData() {
     { name: "Driver License", category: "identity" as const, uploadRequired: true },
     { name: "SSN Verification", category: "compliance" as const, uploadRequired: true },
     { name: "Banking Details", category: "banking" as const, uploadRequired: true },
-    { name: "W-9 Form", category: "compliance" as const, uploadRequired: false },
+    { name: "W-9 Form", category: "compliance" as const, uploadRequired: false, fileName: "w9.pdf",
+      signatureFields: [{ id: uuidv4(), role: "candidate" as const, page: 0, x: 130, y: 195, width: 240, height: 12 }],
+      formFields: [
+        // Line 1 - Name (label at y:671, fillable area below)
+        { id: uuidv4(), label: "Name", type: "text" as const, page: 0, x: 87, y: 643, width: 350, height: 16, fontSize: 11 },
+        // Line 2 - Business name (label at y:637)
+        { id: uuidv4(), label: "Business name", type: "text" as const, page: 0, x: 87, y: 618, width: 350, height: 16, fontSize: 11 },
+        // Line 3a - Tax classification checkboxes (text at y:593)
+        { id: uuidv4(), label: "Individual/sole proprietor", type: "checkbox" as const, page: 0, group: "taxClass", x: 88, y: 592, width: 10, height: 10 },
+        { id: uuidv4(), label: "C Corporation", type: "checkbox" as const, page: 0, group: "taxClass", x: 188, y: 592, width: 10, height: 10 },
+        { id: uuidv4(), label: "S Corporation", type: "checkbox" as const, page: 0, group: "taxClass", x: 256, y: 592, width: 10, height: 10 },
+        { id: uuidv4(), label: "Partnership", type: "checkbox" as const, page: 0, group: "taxClass", x: 324, y: 592, width: 10, height: 10 },
+        { id: uuidv4(), label: "Trust/estate", type: "checkbox" as const, page: 0, group: "taxClass", x: 385, y: 592, width: 10, height: 10 },
+        // LLC checkbox + classification letter entry
+        { id: uuidv4(), label: "LLC", type: "checkbox" as const, page: 0, group: "taxClass", x: 88, y: 579, width: 10, height: 10 },
+        { id: uuidv4(), label: "LLC classification (C, S, or P)", type: "text" as const, page: 0, x: 370, y: 577, width: 22, height: 14, fontSize: 10 },
+        // Other checkbox + description entry
+        { id: uuidv4(), label: "Other", type: "checkbox" as const, page: 0, group: "taxClass", x: 88, y: 545, width: 10, height: 10 },
+        { id: uuidv4(), label: "Other (see instructions)", type: "text" as const, page: 0, x: 170, y: 543, width: 260, height: 14, fontSize: 10 },
+        // Line 4 - Exemptions (right column)
+        { id: uuidv4(), label: "Exempt payee code", type: "text" as const, page: 0, x: 449, y: 565, width: 110, height: 13, fontSize: 10 },
+        { id: uuidv4(), label: "FATCA code", type: "text" as const, page: 0, x: 449, y: 530, width: 110, height: 13, fontSize: 10 },
+        // Line 5 - Address (label at y:501, fillable below)
+        { id: uuidv4(), label: "Address (street, apt.)", type: "text" as const, page: 0, x: 87, y: 484, width: 290, height: 14, fontSize: 11 },
+        // Line 6 - City/state/ZIP (label at y:479)
+        { id: uuidv4(), label: "City, state, ZIP", type: "text" as const, page: 0, x: 87, y: 462, width: 290, height: 14, fontSize: 11 },
+        // Line 7 - Account numbers (label at y:456)
+        { id: uuidv4(), label: "Account number(s)", type: "text" as const, page: 0, x: 87, y: 438, width: 290, height: 14, fontSize: 11 },
+        // Requester info (right side, label at y:501)
+        { id: uuidv4(), label: "Requester's name and address", type: "text" as const, page: 0, x: 388, y: 484, width: 172, height: 14, fontSize: 9 },
+        // Part I - SSN (label at y:423, boxes at y:398-415)
+        { id: uuidv4(), label: "Social security number", type: "ssn" as const, page: 0, x: 435, y: 397, width: 125, height: 18, fontSize: 12 },
+        // Part I - EIN (label at y:378, boxes at y:354-370)
+        { id: uuidv4(), label: "Employer identification number", type: "ein" as const, page: 0, x: 435, y: 353, width: 125, height: 18, fontSize: 12 },
+        // Signature date (next to signature line at y:195)
+        { id: uuidv4(), label: "Date", type: "text" as const, page: 0, x: 400, y: 195, width: 160, height: 12, fontSize: 11 },
+      ],
+    },
     { name: "Internship Agreement", category: "agreement" as const, uploadRequired: false },
   ];
+
+  const defaultSigField = { id: uuidv4(), role: "candidate" as const, page: 0, x: 100, y: 700, width: 200, height: 50 };
 
   const templates: DocumentTemplate[] = templateDefs.map((def) => ({
     id: uuidv4(),
     companyId: company.id,
     name: def.name,
     category: def.category,
-    fileName: "",
+    fileName: (def as { fileName?: string }).fileName || "",
     templateType: "pdf",
     placeholders: [
       { key: "Candidate_Name", label: "Full Name", source: "candidate.name" },
       { key: "Start_Date", label: "Start Date", source: "onboarding.joiningDate" },
       { key: "Position", label: "Position", source: "onboarding.designation" },
     ],
-    signatureFields: [
-      { id: uuidv4(), role: "candidate", page: 0, x: 100, y: 700, width: 200, height: 50 },
-    ],
+    signatureFields: (def as { signatureFields?: typeof defaultSigField[] }).signatureFields || [defaultSigField],
+    formFields: (def as { formFields?: PdfFormField[] }).formFields || [],
     uploadRequired: def.uploadRequired,
     isActive: true,
     createdAt: now,
