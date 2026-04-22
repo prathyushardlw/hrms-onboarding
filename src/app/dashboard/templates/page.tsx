@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { useAuthFetch } from "@/context/AuthContext";
-import { Plus, FileText, Trash2, Edit } from "lucide-react";
+import { Plus, FileText, Trash2, Edit, PenTool } from "lucide-react";
+import Link from "next/link";
 import type { DocumentTemplate, Company } from "@/lib/types";
 
 export default function TemplatesPage() {
@@ -192,7 +193,7 @@ export default function TemplatesPage() {
                 <Trash2 className="h-4 w-4" />
               </button>
             </div>
-            <div className="mt-3">
+            <div className="mt-3 flex items-center justify-between">
               <span
                 className={`inline-block text-xs font-medium px-2.5 py-1 rounded-full capitalize ${
                   categoryColors[t.category] || categoryColors.other
@@ -200,6 +201,13 @@ export default function TemplatesPage() {
               >
                 {t.category}
               </span>
+              <Link
+                href={`/dashboard/templates/${t.id}/design`}
+                className="text-xs font-medium text-blue-600 hover:text-blue-800 flex items-center gap-1"
+              >
+                <PenTool className="h-3.5 w-3.5" />
+                Design Fields
+              </Link>
             </div>
           </div>
         ))}
