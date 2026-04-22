@@ -384,8 +384,28 @@ export async function embedFormFieldsInPdf(
           color: rgb(0, 0, 0),
         });
       }
+    } else if (field.type === "ssn" || field.type === "ein") {
+      // Draw digits spaced across individual boxes
+      const digits = value.replace(/\D/g, "");
+      const groups = field.type === "ssn"
+        ? [{ start: 0, len: 3, xOff: 0, boxW: 38 }, { start: 3, len: 2, xOff: 46, boxW: 32 }, { start: 5, len: 4, xOff: 86, boxW: 56 }]
+        : [{ start: 0, len: 2, xOff: 0, boxW: 26 }, { start: 2, len: 7, xOff: 32, boxW: 110 }];
+      const fontSize = field.fontSize || 12;
+      for (const g of groups) {
+        const groupDigits = digits.substring(g.start, g.start + g.len);
+        const charW = g.boxW / g.len;
+        for (let ci = 0; ci < groupDigits.length; ci++) {
+          page.drawText(groupDigits[ci], {
+            x: field.x + g.xOff + ci * charW + charW * 0.3,
+            y: field.y + (field.height - fontSize) / 2,
+            size: fontSize,
+            font,
+            color: rgb(0, 0, 0),
+          });
+        }
+      }
     } else {
-      // text / ssn / ein — draw the text at the field position
+      // text — draw at the field position
       const fontSize = field.fontSize || 11;
       page.drawText(value, {
         x: field.x + 2,

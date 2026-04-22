@@ -128,8 +128,94 @@ export default function PdfFormFiller({
     return { left, top, width, height };
   };
 
+  // SSN/EIN digit group definitions (offsets in PDF points from field.x)
+  const ssnGroups = [
+    { start: 0, len: 3, xOff: 0, w: 38 },
+    { start: 3, len: 2, xOff: 46, w: 32 },
+    { start: 5, len: 4, xOff: 86, w: 56 },
+  ];
+  const einGroups = [
+    { start: 0, len: 2, xOff: 0, w: 26 },
+    { start: 2, len: 7, xOff: 32, w: 110 },
+  ];
+
+  const renderDigitGroups = (
+    field: PdfFormField,
+    groups: { start: number; len: number; xOff: number; w: number }[]
+  ) => {
+    const pos = pdfToCSS(field);
+    const digits = (fieldValues[field.id] || "").replace(/\D/g, "");
+    const fontSize = Math.max((field.fontSize || 12) * scale, 10);
+
+    return (
+      <div
+        key={field.id}
+        style={{
+          position: "absolute",
+          left: pos.left,
+          top: pos.top,
+          width: pos.width,
+          height: pos.height,
+          zIndex: 10,
+        }}
+      >
+        {groups.map((g, gi) => {
+          const groupVal = digits.substring(g.start, g.start + g.len);
+          const charW = (g.w * scale) / g.len;
+          return (
+            <input
+              key={gi}
+              id={`${field.id}-${gi}`}
+              type="text"
+              inputMode="numeric"
+              maxLength={g.len}
+              value={groupVal}
+              title={field.label}
+              placeholder={isSigned ? "" : "0".repeat(g.len)}
+              onChange={(e) => {
+                if (isSigned) return;
+                const newVal = e.target.value.replace(/\D/g, "").substring(0, g.len);
+                const arr = digits.split("");
+                while (arr.length < g.start + g.len) arr.push("");
+                for (let j = 0; j < g.len; j++) {
+                  arr[g.start + j] = j < newVal.length ? newVal[j] : "";
+                }
+                updateField(field.id, arr.filter((c) => c).join(""));
+                if (newVal.length === g.len && gi < groups.length - 1) {
+                  document.getElementById(`${field.id}-${gi + 1}`)?.focus();
+                }
+              }}
+              readOnly={isSigned}
+              style={{
+                position: "absolute",
+                left: g.xOff * scale,
+                top: 0,
+                width: g.w * scale,
+                height: pos.height,
+                fontSize,
+                fontFamily: "'Courier New', monospace",
+                letterSpacing: `${charW * 0.42}px`,
+                textAlign: "center",
+                background: "transparent",
+                border: "none",
+                outline: "none",
+                color: "#111",
+                padding: 0,
+                boxSizing: "border-box",
+              }}
+            />
+          );
+        })}
+      </div>
+    );
+  };
+
   const renderFieldOverlay = (field: PdfFormField, pageIndex: number) => {
     if (field.page !== pageIndex) return null;
+
+    if (field.type === "ssn") return renderDigitGroups(field, ssnGroups);
+    if (field.type === "ein") return renderDigitGroups(field, einGroups);
+
     const pos = pdfToCSS(field);
     const commonStyle: React.CSSProperties = {
       position: "absolute",
@@ -166,7 +252,7 @@ export default function PdfFormFiller({
       );
     }
 
-    // text / ssn / ein
+    // text fields
     const fontSize = (field.fontSize || 11) * scale;
     return (
       <input

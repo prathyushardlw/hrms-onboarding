@@ -87,10 +87,10 @@ export async function seedData() {
         { id: uuidv4(), label: "Account number(s)", type: "text" as const, page: 0, x: 87, y: 438, width: 290, height: 14, fontSize: 11 },
         // Requester info (right side, label at y:501)
         { id: uuidv4(), label: "Requester's name and address", type: "text" as const, page: 0, x: 388, y: 484, width: 172, height: 14, fontSize: 9 },
-        // Part I - SSN (label at y:423, boxes at y:398-415)
-        { id: uuidv4(), label: "Social security number", type: "ssn" as const, page: 0, x: 435, y: 397, width: 125, height: 18, fontSize: 12 },
-        // Part I - EIN (label at y:378, boxes at y:354-370)
-        { id: uuidv4(), label: "Employer identification number", type: "ein" as const, page: 0, x: 435, y: 353, width: 125, height: 18, fontSize: 12 },
+        // Part I - SSN (dashes at x:457,x:497, y:405; boxes at y:395-415)
+        { id: uuidv4(), label: "Social security number", type: "ssn" as const, page: 0, x: 416, y: 395, width: 142, height: 20, fontSize: 12 },
+        // Part I - EIN (dash at x:443, y:360; boxes at y:350-370)
+        { id: uuidv4(), label: "Employer identification number", type: "ein" as const, page: 0, x: 416, y: 350, width: 142, height: 20, fontSize: 12 },
         // Signature date (next to signature line at y:195)
         { id: uuidv4(), label: "Date", type: "text" as const, page: 0, x: 400, y: 195, width: 160, height: 12, fontSize: 11 },
       ],
