@@ -11,6 +11,7 @@ import {
   badRequest,
   ok,
   created,
+  resolveCompanyId,
 } from "@/lib/api-helpers";
 import type { Onboarding, OnboardingDocument } from "@/lib/types";
 
@@ -20,8 +21,10 @@ export async function GET(req: NextRequest) {
 
   const { searchParams } = new URL(req.url);
   const status = searchParams.get("status");
-  const companyId = searchParams.get("companyId");
   const search = searchParams.get("search")?.toLowerCase();
+
+  // Enforce company scope from JWT (super_admin can optionally filter)
+  const companyId = resolveCompanyId(auth, searchParams.get("companyId"));
 
   let onboardings = onboardingsStore.getAll();
 
@@ -46,7 +49,7 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   const auth = getAuthFromRequest(req);
-  if (!auth || !["admin", "hr"].includes(auth.role)) return unauthorized();
+  if (!auth || !["super_admin", "admin", "hr"].includes(auth.role)) return unauthorized();
 
   try {
     const body = await req.json();

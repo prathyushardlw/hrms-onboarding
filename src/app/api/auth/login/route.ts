@@ -1,7 +1,8 @@
 import { NextRequest } from "next/server";
-import { loginUser, registerUser } from "@/lib/auth";
-import { loginSchema, registerSchema } from "@/lib/validations";
-import { ok, badRequest, created } from "@/lib/api-helpers";
+import { loginUser } from "@/lib/auth";
+import { companiesStore } from "@/lib/store";
+import { loginSchema } from "@/lib/validations";
+import { ok, badRequest } from "@/lib/api-helpers";
 
 export async function POST(req: NextRequest) {
   try {
@@ -12,7 +13,14 @@ export async function POST(req: NextRequest) {
     }
 
     const { user, token } = await loginUser(parsed.data.email, parsed.data.password);
-    return ok({ user, token });
+
+    // Resolve active company name for the frontend
+    const activeCompanyId = user.companyIds[0] ?? null;
+    const activeCompanyName = activeCompanyId
+      ? (companiesStore.getById(activeCompanyId)?.name ?? null)
+      : null;
+
+    return ok({ user, token, activeCompanyId, activeCompanyName });
   } catch (error) {
     return badRequest((error as Error).message);
   }

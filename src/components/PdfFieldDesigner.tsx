@@ -367,8 +367,9 @@ export default function PdfFieldDesigner({
             )}
           </div>
 
-          {/* Field List */}
-          <div className="flex-1 overflow-y-auto p-3 space-y-1">
+          {/* Field List + Properties — single scrollable area */}
+          <div className="flex-1 overflow-y-auto">
+            <div className="p-3 space-y-1">
             <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 px-1">
               Fields ({formFields.length + signatureFields.length})
             </p>
@@ -436,11 +437,11 @@ export default function PdfFieldDesigner({
                 No fields yet. Select a field type above, then click on the PDF to place it.
               </p>
             )}
-          </div>
+            </div>
 
           {/* Selected Field Properties */}
           {selectedField && (
-            <div className="border-t border-gray-200 p-4 space-y-3 flex-shrink-0">
+            <div className="border-t border-gray-200 p-4 space-y-3">
               <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
                 Properties
               </p>
@@ -615,6 +616,7 @@ export default function PdfFieldDesigner({
               </button>
             </div>
           )}
+          </div>{/* end scrollable area */}
         </div>
 
         {/* PDF Canvas */}
@@ -685,12 +687,30 @@ export default function PdfFieldDesigner({
                           onMouseDown={(e) => {
                             if (!addMode) handleDragStart(e, field.id);
                           }}
-                          className={`border-2 rounded-sm cursor-move flex items-center ${
+                          className={`border-2 rounded-sm cursor-move flex items-center overflow-visible ${
                             isSelected
                               ? "border-blue-500 bg-blue-100/60"
                               : "border-blue-300/60 bg-blue-50/40 hover:border-blue-400"
                           }`}
                         >
+                          {/* Inline toolbar for selected field */}
+                          {isSelected && (
+                            <div
+                              className="absolute -top-6 left-0 flex items-center gap-0.5 bg-blue-600 rounded-t px-1 py-0.5"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              <GripVertical className="h-3 w-3 text-white/70 cursor-move" />
+                              <span className="text-[10px] text-white/90 font-medium truncate max-w-[80px]">{field.label}</span>
+                              <button
+                                onMouseDown={(e) => e.stopPropagation()}
+                                onClick={(e) => { e.stopPropagation(); deleteField(field.id); }}
+                                className="ml-1 text-white/80 hover:text-white"
+                              >
+                                <X className="h-3 w-3" />
+                              </button>
+                            </div>
+                          )}
+
                           <span
                             className="text-[10px] text-blue-700 truncate px-1 select-none pointer-events-none"
                             style={{ lineHeight: `${pos.height}px` }}
@@ -734,12 +754,30 @@ export default function PdfFieldDesigner({
                           onMouseDown={(e) => {
                             if (!addMode) handleDragStart(e, field.id);
                           }}
-                          className={`border-2 border-dashed rounded-sm cursor-move flex items-center justify-center ${
+                          className={`border-2 border-dashed rounded-sm cursor-move flex items-center justify-center overflow-visible ${
                             isSelected
                               ? "border-emerald-500 bg-emerald-100/60"
                               : "border-emerald-300/60 bg-emerald-50/40 hover:border-emerald-400"
                           }`}
                         >
+                          {/* Inline toolbar for selected signature */}
+                          {isSelected && (
+                            <div
+                              className="absolute -top-6 left-0 flex items-center gap-0.5 bg-emerald-600 rounded-t px-1 py-0.5"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              <GripVertical className="h-3 w-3 text-white/70 cursor-move" />
+                              <span className="text-[10px] text-white/90 font-medium">Signature ({field.role})</span>
+                              <button
+                                onMouseDown={(e) => e.stopPropagation()}
+                                onClick={(e) => { e.stopPropagation(); deleteField(field.id); }}
+                                className="ml-1 text-white/80 hover:text-white"
+                              >
+                                <X className="h-3 w-3" />
+                              </button>
+                            </div>
+                          )}
+
                           <span className="text-[10px] text-emerald-700 select-none pointer-events-none">
                             ✍ Signature
                           </span>
@@ -768,7 +806,7 @@ export default function PdfFieldDesigner({
           · Scale: {scale.toFixed(2)}x · {numPages} page{numPages !== 1 ? "s" : ""}
         </span>
         <span>
-          Drag fields to reposition · Drag bottom-right corner to resize
+          Drag fields to reposition · Drag bottom-right corner to resize · Click field to select · Blue toolbar = delete or move
         </span>
       </div>
     </div>

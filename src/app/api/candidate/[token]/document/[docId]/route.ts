@@ -24,6 +24,12 @@ export async function POST(
   const onboarding = getOnboardingByToken(token);
   if (!onboarding) return notFound("Invalid or expired onboarding link");
 
+  const signerIp =
+    req.headers.get("x-forwarded-for")?.split(",")[0].trim() ||
+    req.headers.get("x-real-ip") ||
+    "unknown";
+  const signerAgent = req.headers.get("user-agent") ?? "unknown";
+
   try {
     const formData = await req.formData();
     const file = formData.get("file") as File | null;
@@ -91,6 +97,8 @@ export async function POST(
       updatedDoc.candidateSignature = {
         dataUrl: signatureData,
         signedAt: new Date().toISOString(),
+        signerIp,
+        signerAgent,
       };
       updatedDoc.status = "signed";
 
@@ -98,7 +106,9 @@ export async function POST(
         onboardingId: onboarding.id,
         event: "document_signed",
         performedBy: { type: "candidate" },
-        metadata: { documentId: docId },
+        metadata: { documentId: docId, documentName: doc.name },
+        ipAddress: signerIp,
+        userAgent: signerAgent,
       });
     }
 
@@ -149,6 +159,8 @@ export async function POST(
       updatedDoc.candidateSignature = {
         dataUrl: signatureData,
         signedAt: new Date().toISOString(),
+        signerIp,
+        signerAgent,
       };
       updatedDoc.status = "signed";
       updatedDoc.completedAt = new Date().toISOString();
@@ -158,6 +170,8 @@ export async function POST(
         event: "document_signed",
         performedBy: { type: "candidate" },
         metadata: { documentId: docId, documentName: doc.name },
+        ipAddress: signerIp,
+        userAgent: signerAgent,
       });
     }
 

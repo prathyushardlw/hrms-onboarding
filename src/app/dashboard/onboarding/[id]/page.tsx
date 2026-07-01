@@ -9,6 +9,31 @@ import {
 } from "lucide-react";
 import type { Onboarding, AuditLog } from "@/lib/types";
 
+function parseBrowser(ua: string): string {
+  if (/Edg\//.test(ua)) {
+    const v = ua.match(/Edg\/([\d.]+)/)?.[1]?.split(".")[0];
+    return `Edge ${v ?? ""}${/Windows/.test(ua) ? " · Windows" : /Mac/.test(ua) ? " · macOS" : ""}`;
+  }
+  if (/OPR\/|Opera\//.test(ua)) {
+    const v = ua.match(/OPR\/([\d.]+)/)?.[1]?.split(".")[0];
+    return `Opera ${v ?? ""}`;
+  }
+  if (/Chrome\//.test(ua)) {
+    const v = ua.match(/Chrome\/([\d.]+)/)?.[1]?.split(".")[0];
+    const os = /Windows/.test(ua) ? "Windows" : /Mac/.test(ua) ? "macOS" : /Android/.test(ua) ? "Android" : /Linux/.test(ua) ? "Linux" : "";
+    return `Chrome ${v ?? ""}${os ? ` · ${os}` : ""}`;
+  }
+  if (/Firefox\//.test(ua)) {
+    const v = ua.match(/Firefox\/([\d.]+)/)?.[1]?.split(".")[0];
+    return `Firefox ${v ?? ""}`;
+  }
+  if (/Safari\//.test(ua)) {
+    const v = ua.match(/Version\/([\d.]+)/)?.[1]?.split(".")[0];
+    return `Safari ${v ?? ""}${/iPhone|iPad/.test(ua) ? " · iOS" : " · macOS"}`;
+  }
+  return ua.slice(0, 60);
+}
+
 const statusConfig: Record<string, { label: string; color: string; icon: React.ElementType }> = {
   initiated: { label: "Initiated", color: "bg-gray-100 text-gray-700", icon: Clock },
   sent: { label: "Sent", color: "bg-emerald-100 text-emerald-800", icon: Send },
@@ -41,6 +66,8 @@ export default function OnboardingDetailPage() {
   const [correctionNote, setCorrectionNote] = useState("");
   const [showAudit, setShowAudit] = useState(false);
   const [sendResult, setSendResult] = useState<string | null>(null);
+  const [reminderLoading, setReminderLoading] = useState(false);
+  const [reminderResult, setReminderResult] = useState<string | null>(null);
   const [viewingPdfUrl, setViewingPdfUrl] = useState<string | null>(null);
   const [viewingDocName, setViewingDocName] = useState("");
   const [downloading, setDownloading] = useState(false);
@@ -116,6 +143,14 @@ export default function OnboardingDetailPage() {
     setActionLoading(false);
   };
 
+  const handleReminder = async () => {
+    setReminderLoading(true);
+    setReminderResult(null);
+    const res = await authFetch(`/api/onboarding/${id}/remind`, { method: "POST" });
+    setReminderResult(res.success ? "Reminder sent successfully!" : res.error ?? "Failed to send reminder");
+    setReminderLoading(false);
+  };
+
   if (loading || !onboarding) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -174,6 +209,26 @@ export default function OnboardingDetailPage() {
               )}
               Send Onboarding Package
             </button>
+          )}
+          {["sent", "in_progress"].includes(onboarding.status) && (
+            <>
+              <button
+                onClick={handleSend}
+                disabled={actionLoading}
+                className="bg-[#0e382b] text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-[#18471c] disabled:opacity-50 flex items-center gap-2"
+              >
+                {actionLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+                Resend Invitation
+              </button>
+              <button
+                onClick={handleReminder}
+                disabled={reminderLoading}
+                className="px-4 py-2 border border-amber-300 bg-amber-50 text-amber-800 rounded-lg text-sm font-medium hover:bg-amber-100 disabled:opacity-50 flex items-center gap-2"
+              >
+                {reminderLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <MessageSquare className="h-4 w-4" />}
+                Send Reminder
+              </button>
+            </>
           )}
           {onboarding.status === "submitted" && (
             <>
@@ -240,6 +295,14 @@ export default function OnboardingDetailPage() {
             <p className="text-sm text-emerald-900 font-medium">Onboarding link sent!</p>
             <p className="text-xs text-emerald-700 mt-1 break-all">{sendResult}</p>
           </div>
+        )}
+        {reminderResult && (
+          <div className={`mt-4 p-3 rounded-lg ${reminderResult.includes("success") ? "bg-amber-50" : "bg-red-50"}`}>
+            <p className={`text-sm font-medium ${reminderResult.includes("success") ? "text-amber-900" : "text-red-700"}`}>{reminderResult}</p>
+          </div>
+        )}
+        {onboarding.lastReminderSent && (
+          <p className="mt-3 text-xs text-gray-400">Last reminder sent: {new Date(onboarding.lastReminderSent).toLocaleString("en-IN", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })}</p>
         )}
       </div>
 
@@ -320,10 +383,21 @@ export default function OnboardingDetailPage() {
                     </p>
                   )}
                   {doc.candidateSignature && (
-                    <p className="text-xs text-green-600 mt-0.5">
-                      Signed on{" "}
-                      {new Date(doc.candidateSignature.signedAt).toLocaleString()}
-                    </p>
+                    <div className="mt-1 space-y-0.5">
+                      <p className="text-xs text-green-600">
+                        Signed on {new Date(doc.candidateSignature.signedAt).toLocaleString()}
+                      </p>
+                      {doc.candidateSignature.signerIp && (
+                        <p className="text-xs text-gray-400">
+                          IP: {doc.candidateSignature.signerIp === "::1" || doc.candidateSignature.signerIp === "127.0.0.1" ? `${doc.candidateSignature.signerIp} (localhost)` : doc.candidateSignature.signerIp}
+                        </p>
+                      )}
+                      {doc.candidateSignature.signerAgent && (
+                        <p className="text-xs text-gray-400" title={doc.candidateSignature.signerAgent}>
+                          {parseBrowser(doc.candidateSignature.signerAgent)}
+                        </p>
+                      )}
+                    </div>
                   )}
                 </div>
                 <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${ds.color}`}>
@@ -337,8 +411,7 @@ export default function OnboardingDetailPage() {
                     );
                     if (res.ok) {
                       const blob = await res.blob();
-                      setViewingPdfUrl(URL.createObjectURL(blob));
-                      setViewingDocName(doc.name);
+                      window.open(URL.createObjectURL(blob), "_blank");
                     }
                   }}
                   className="text-emerald-700 hover:text-emerald-900"
@@ -387,32 +460,7 @@ export default function OnboardingDetailPage() {
         </div>
       </div>
 
-      {/* PDF Viewer Modal */}
-      {viewingPdfUrl && (
-        <div className="fixed inset-0 z-50 bg-black/60 flex flex-col">
-          <div className="bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between flex-shrink-0">
-            <h3 className="font-semibold text-gray-900 text-sm truncate">
-              {viewingDocName}
-            </h3>
-            <button
-              onClick={() => {
-                URL.revokeObjectURL(viewingPdfUrl);
-                setViewingPdfUrl(null);
-              }}
-              className="text-gray-500 hover:text-gray-700 text-sm font-medium"
-            >
-              Close ✕
-            </button>
-          </div>
-          <div className="flex-1 bg-gray-100">
-            <iframe
-              src={viewingPdfUrl}
-              className="w-full h-full"
-              title={viewingDocName}
-            />
-          </div>
-        </div>
-      )}
+      {/* PDF Viewer Modal removed — PDFs open in new tab via window.open */}
 
       {/* Correction modal */}
       {showCorrectionModal && (
@@ -490,34 +538,55 @@ export default function OnboardingDetailPage() {
       {/* Audit Log */}
       {showAudit && (
         <div className="bg-white rounded-xl border border-gray-200">
-          <div className="px-6 py-4 border-b border-gray-100">
+          <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
             <h3 className="font-semibold text-gray-900">Audit Log</h3>
+            <span className="text-xs text-gray-400">{auditLogs.length} events · newest first</span>
           </div>
-          <div className="p-6">
+          <div className="divide-y divide-gray-50">
             {auditLogs.length === 0 ? (
-              <p className="text-sm text-gray-500">No events recorded yet.</p>
+              <p className="text-sm text-gray-500 px-6 py-4">No events recorded yet.</p>
             ) : (
-              <div className="space-y-3">
-                {auditLogs.map((log) => (
-                  <div key={log.id} className="flex items-start gap-3">
-                    <div className="h-2 w-2 rounded-full bg-blue-400 mt-2 flex-shrink-0" />
-                    <div>
-                      <p className="text-sm text-gray-900">
-                        <span className="font-medium capitalize">
+              auditLogs.map((log) => {
+                const eventColors: Record<string, string> = {
+                  created: "bg-blue-400", sent: "bg-emerald-400", link_opened: "bg-yellow-400",
+                  document_viewed: "bg-gray-400", document_signed: "bg-green-500",
+                  document_uploaded: "bg-indigo-400", submitted: "bg-purple-500",
+                  verified: "bg-emerald-500", correction_requested: "bg-red-400", completed: "bg-emerald-600",
+                };
+                const dot = eventColors[log.event] ?? "bg-gray-400";
+                return (
+                  <div key={log.id} className="px-6 py-3 flex items-start gap-3">
+                    <div className={`h-2 w-2 rounded-full ${dot} mt-2 flex-shrink-0`} />
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="text-sm font-medium text-gray-900 capitalize">
                           {log.event.replace(/_/g, " ")}
                         </span>
-                        <span className="text-gray-500">
-                          {" "}
-                          by {log.performedBy.type}
-                        </span>
-                      </p>
-                      <p className="text-xs text-gray-400">
+                        <span className="text-xs text-gray-400">by {log.performedBy.type}</span>
+                        {(log.metadata as any)?.documentName && (
+                          <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">
+                            {(log.metadata as any).documentName}
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-xs text-gray-400 mt-0.5">
                         {new Date(log.timestamp).toLocaleString()}
                       </p>
+                      {(log.ipAddress || log.userAgent) && (
+                        <p className="text-xs text-gray-400 mt-0.5">
+                          {log.ipAddress && (
+                            <span className="mr-3">
+                              IP: {log.ipAddress === "::1" || log.ipAddress === "127.0.0.1"
+                                ? `${log.ipAddress} (localhost)` : log.ipAddress}
+                            </span>
+                          )}
+                          {log.userAgent && <span>{parseBrowser(log.userAgent)}</span>}
+                        </p>
+                      )}
                     </div>
                   </div>
-                ))}
-              </div>
+                );
+              })
             )}
           </div>
         </div>

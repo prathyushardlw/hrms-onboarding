@@ -9,7 +9,11 @@ export async function GET(req: NextRequest) {
   const auth = getAuthFromRequest(req);
   if (!auth) return unauthorized();
 
-  const companies = companiesStore.getAll();
+  // Regular users only see their accessible companies
+  let companies = companiesStore.getAll().filter((c) => c.isActive);
+  if (auth.role !== "super_admin") {
+    companies = companies.filter((c) => auth.companyIds.includes(c.id));
+  }
   return ok(companies);
 }
 
@@ -29,6 +33,7 @@ export async function POST(req: NextRequest) {
       id: uuidv4(),
       name: parsed.data.name,
       logo: parsed.data.logo,
+      isActive: true,
       createdAt: now,
       updatedAt: now,
     };

@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server";
 import { docRulesStore } from "@/lib/store";
 import { createDocRuleSchema } from "@/lib/validations";
-import { getAuthFromRequest, unauthorized, badRequest, ok, created } from "@/lib/api-helpers";
+import { getAuthFromRequest, unauthorized, badRequest, ok, created, resolveCompanyId } from "@/lib/api-helpers";
 import { v4 as uuidv4 } from "uuid";
 import type { EmployeeTypeDocRule } from "@/lib/types";
 
@@ -10,8 +10,8 @@ export async function GET(req: NextRequest) {
   if (!auth) return unauthorized();
 
   const { searchParams } = new URL(req.url);
-  const companyId = searchParams.get("companyId");
   const employmentType = searchParams.get("employmentType");
+  const companyId = resolveCompanyId(auth, searchParams.get("companyId"));
 
   let rules = docRulesStore.getAll();
   if (companyId) rules = rules.filter((r) => r.companyId === companyId);
@@ -22,7 +22,7 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   const auth = getAuthFromRequest(req);
-  if (!auth || !["admin", "hr"].includes(auth.role)) return unauthorized();
+  if (!auth || !["super_admin", "admin", "hr"].includes(auth.role)) return unauthorized();
 
   try {
     const body = await req.json();

@@ -9,6 +9,26 @@ export function getAuthFromRequest(req: NextRequest): JwtPayload | null {
   return verifyToken(token);
 }
 
+/** Returns true if the user is a platform-level super admin */
+export function isSuperAdmin(auth: JwtPayload): boolean {
+  return auth.role === "super_admin";
+}
+
+/**
+ * Returns the company ID to use for data filtering.
+ * Super admins can optionally pass ?companyId= to filter a specific company.
+ * Regular users always get their activeCompanyId from the JWT.
+ */
+export function resolveCompanyId(
+  auth: JwtPayload,
+  queryCompanyId?: string | null
+): string | null {
+  if (isSuperAdmin(auth)) {
+    return queryCompanyId ?? null; // null = see all
+  }
+  return auth.activeCompanyId;
+}
+
 export function unauthorized(): NextResponse<ApiResponse> {
   return NextResponse.json(
     { success: false, error: "Unauthorized" },

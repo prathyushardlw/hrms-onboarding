@@ -16,7 +16,7 @@ export async function POST(req: NextRequest) {
       parsed.data.email,
       parsed.data.password,
       parsed.data.role,
-      parsed.data.companyId
+      parsed.data.companyIds
     );
     return created(user);
   } catch (error) {

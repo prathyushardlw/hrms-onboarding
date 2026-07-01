@@ -11,7 +11,10 @@ export interface JwtPayload {
   userId: string;
   email: string;
   role: UserRole;
-  companyId: string;
+  /** The company currently active in this session */
+  activeCompanyId: string;
+  /** All companies this user can access (empty = super_admin sees all) */
+  companyIds: string[];
 }
 
 export function signToken(payload: JwtPayload): string {
@@ -42,7 +45,7 @@ export async function registerUser(
   email: string,
   password: string,
   role: UserRole,
-  companyId: string
+  companyIds: string[]
 ): Promise<Omit<User, "passwordHash">> {
   const existing = usersStore.find((u) => u.email === email);
   if (existing.length > 0) {
@@ -57,7 +60,7 @@ export async function registerUser(
     email,
     passwordHash,
     role,
-    companyId,
+    companyIds,
     createdAt: now,
     updatedAt: now,
   };
@@ -82,15 +85,41 @@ export async function loginUser(
     throw new Error("Invalid email or password");
   }
 
+  const activeCompanyId = user.companyIds[0] ?? "";
   const token = signToken({
     userId: user.id,
     email: user.email,
     role: user.role,
-    companyId: user.companyId,
+    activeCompanyId,
+    companyIds: user.companyIds,
   });
 
   const { passwordHash: _, ...safe } = user;
   return { user: safe, token };
+}
+
+export async function switchCompany(
+  userId: string,
+  targetCompanyId: string
+): Promise<string> {
+  const users = usersStore.find((u) => u.id === userId);
+  if (users.length === 0) throw new Error("User not found");
+  const user = users[0];
+
+  if (
+    user.role !== "super_admin" &&
+    !user.companyIds.includes(targetCompanyId)
+  ) {
+    throw new Error("Access denied to this company");
+  }
+
+  return signToken({
+    userId: user.id,
+    email: user.email,
+    role: user.role,
+    activeCompanyId: targetCompanyId,
+    companyIds: user.companyIds,
+  });
 }
 
 export function generateAccessToken(): {

@@ -3,7 +3,7 @@
 import { useAuth } from "@/context/AuthContext";
 import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
-import { useEffect } from "react";
+import { useEffect, useState, useCallback } from "react";
 import {
   LayoutDashboard,
   UserPlus,
@@ -11,16 +11,26 @@ import {
   Settings,
   LogOut,
   Building2,
+  ChevronDown,
+  Shield,
   Menu,
-  X,
+  Briefcase,
+  Users,
 } from "lucide-react";
-import { useState } from "react";
 
-const navItems = [
+const hrNavItems = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
+  { href: "/dashboard/jobs", label: "Recruitment", icon: Briefcase },
   { href: "/dashboard/onboarding", label: "Onboarding", icon: UserPlus },
+  { href: "/dashboard/employees", label: "Employees", icon: Users },
   { href: "/dashboard/templates", label: "Templates", icon: FileText },
   { href: "/dashboard/settings", label: "Settings", icon: Settings },
+];
+
+const adminNavItems = [
+  { href: "/dashboard/admin", label: "Overview", icon: Shield },
+  { href: "/dashboard/admin/companies", label: "Companies", icon: Building2 },
+  { href: "/dashboard/admin/users", label: "Users", icon: UserPlus },
 ];
 
 export default function DashboardLayout({
@@ -28,10 +38,41 @@ export default function DashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const { user, logout, isLoading } = useAuth();
+  const { user, logout, isLoading, isSuperAdmin, activeCompanyId, activeCompanyName, switchCompany } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [companies, setCompanies] = useState<{ id: string; name: string }[]>([]);
+  const [switcherOpen, setSwitcherOpen] = useState(false);
+  const [switching, setSwitching] = useState(false);
+
+  const navItems = isSuperAdmin ? adminNavItems : hrNavItems;
+
+  const fetchCompanies = useCallback(async () => {
+    if (!user) return;
+    try {
+      const stored = localStorage.getItem("auth");
+      const token = stored ? JSON.parse(stored).token : null;
+      const res = await fetch("/api/companies", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data = await res.json();
+      if (data.success) setCompanies(data.data);
+    } catch { /* ignore */ }
+  }, [user]);
+
+  useEffect(() => { fetchCompanies(); }, [fetchCompanies]);
+
+  const handleSwitch = async (companyId: string, companyName: string) => {
+    setSwitching(true);
+    try {
+      await switchCompany(companyId, companyName);
+      setSwitcherOpen(false);
+      router.push("/dashboard");
+    } catch { /* ignore */ } finally {
+      setSwitching(false);
+    }
+  };
 
   useEffect(() => {
     if (!isLoading && !user) {
@@ -39,10 +80,24 @@ export default function DashboardLayout({
     }
   }, [user, isLoading, router]);
 
+  // Map pathname to a human-readable page title for the mobile header
+  const pageTitle = (() => {
+    if (pathname === "/dashboard") return "Dashboard";
+    if (pathname.startsWith("/dashboard/onboarding")) return "Onboarding";
+    if (pathname.startsWith("/dashboard/jobs")) return "Recruitment";
+    if (pathname.startsWith("/dashboard/employees")) return "Employees";
+    if (pathname.startsWith("/dashboard/templates")) return "Templates";
+    if (pathname.startsWith("/dashboard/settings")) return "Settings";
+    if (pathname.startsWith("/dashboard/admin/users")) return "Users";
+    if (pathname.startsWith("/dashboard/admin/companies")) return "Companies";
+    if (pathname.startsWith("/dashboard/admin")) return "Admin";
+    return isSuperAdmin ? "Super Admin" : "HRMS";
+  })();
+
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" />
+      <div className="min-h-screen flex items-center justify-center bg-[#f6f8fa]">
+        <div className="animate-spin rounded-full h-8 w-8 border-2 border-emerald-600 border-t-transparent" />
       </div>
     );
   }
@@ -50,19 +105,30 @@ export default function DashboardLayout({
   if (!user) return null;
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
+    <div className="min-h-screen bg-[#f6f8fa] flex">
       {/* Sidebar */}
       <aside
-        className={`fixed inset-y-0 left-0 z-50 w-64 bg-[#0e382b] border-r border-[#18471c] transform transition-transform duration-200 lg:translate-x-0 lg:static lg:inset-auto ${
+        className={`fixed inset-y-0 left-0 z-50 w-60 bg-[#0a2d22] flex flex-col transform transition-transform duration-200 lg:translate-x-0 lg:static lg:inset-auto ${
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
-        <div className="flex items-center gap-2 px-6 py-5 border-b border-[#18471c]">
-          <span className="text-2xl">📋</span>
-          <span className="font-bold text-lg text-white">Onboarding</span>
+        {/* Logo */}
+        <div className="flex items-center gap-3 px-5 py-5 border-b border-white/[0.07]">
+          <div className="w-9 h-9 rounded-xl bg-emerald-400/20 flex items-center justify-center text-xl flex-shrink-0">
+            📋
+          </div>
+          <div className="min-w-0">
+            <span className="font-bold text-[15px] text-white tracking-tight block">HRMS</span>
+            {isSuperAdmin ? (
+              <span className="text-[11px] font-medium text-emerald-400">Super Admin</span>
+            ) : (
+              <span className="text-[11px] text-white/40 truncate block">{activeCompanyName ?? "—"}</span>
+            )}
+          </div>
         </div>
 
-        <nav className="px-3 py-4 space-y-1">
+        {/* Nav */}
+        <nav className="flex-1 px-3 py-3 space-y-0.5 overflow-y-auto">
           {navItems.map((item) => {
             const Icon = item.icon;
             const isActive =
@@ -72,36 +138,32 @@ export default function DashboardLayout({
                 key={item.href}
                 href={item.href}
                 onClick={() => setSidebarOpen(false)}
-                className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
+                className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-[13.5px] font-medium transition-all ${
                   isActive
-                    ? "bg-[#08bf36]/15 text-[#08bf36]"
-                    : "text-gray-300 hover:bg-white/5 hover:text-white"
+                    ? "bg-white text-[#0e382b] shadow-sm"
+                    : "text-white/60 hover:bg-white/[0.07] hover:text-white"
                 }`}
               >
-                <Icon className="h-5 w-5" />
+                <Icon className="h-[17px] w-[17px] flex-shrink-0" />
                 {item.label}
               </Link>
             );
           })}
         </nav>
 
-        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-[#18471c]">
-          <div className="flex items-center gap-3 px-3 py-2">
-            <div className="h-8 w-8 rounded-full bg-[#08bf36]/20 flex items-center justify-center text-[#08bf36] font-medium text-sm">
+        {/* User profile */}
+        <div className="px-3 pb-4 pt-2 border-t border-white/[0.07]">
+          <div className="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-white/[0.05]">
+            <div className="h-8 w-8 rounded-full bg-emerald-400/20 flex items-center justify-center text-emerald-400 font-semibold text-sm flex-shrink-0">
               {user.name.charAt(0).toUpperCase()}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-white truncate">
-                {user.name}
-              </p>
-              <p className="text-xs text-gray-400 truncate">{user.role}</p>
+              <p className="text-[13px] font-semibold text-white truncate leading-tight">{user.name}</p>
+              <p className="text-[11px] text-white/40 capitalize">{user.role.replace("_", " ")}</p>
             </div>
             <button
-              onClick={() => {
-                logout();
-                router.push("/login");
-              }}
-              className="text-gray-400 hover:text-red-500 transition-colors"
+              onClick={() => { logout(); router.push("/login"); }}
+              className="text-white/25 hover:text-red-400"
               title="Sign out"
             >
               <LogOut className="h-4 w-4" />
@@ -120,19 +182,53 @@ export default function DashboardLayout({
 
       {/* Main content */}
       <div className="flex-1 flex flex-col min-w-0">
-        <header className="bg-white border-b border-gray-200 px-4 py-3 flex items-center gap-4 lg:px-6">
+        <header className="bg-white border-b border-gray-100 px-4 py-3 flex items-center gap-3 lg:px-6 shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
           <button
             onClick={() => setSidebarOpen(true)}
-            className="lg:hidden text-gray-500 hover:text-gray-700"
+            className="lg:hidden text-gray-500 hover:text-gray-800"
           >
             <Menu className="h-5 w-5" />
           </button>
-          <h1 className="text-lg font-semibold text-gray-900">
-            Onboarding
+          <h1 className="text-[15px] font-semibold text-gray-800 flex-1 lg:hidden">
+            {pageTitle}
           </h1>
+
+          {/* Company Switcher — only for non-super-admin with multiple companies */}
+          {!isSuperAdmin && companies.length > 1 && (
+            <div className="relative ml-auto">
+              <button
+                onClick={() => setSwitcherOpen((o) => !o)}
+                className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-gray-200 text-sm text-gray-600 hover:bg-gray-50 hover:border-gray-300"
+              >
+                <Building2 className="h-3.5 w-3.5 text-gray-400" />
+                <span className="max-w-[140px] truncate font-medium">{activeCompanyName ?? "Select company"}</span>
+                <ChevronDown className="h-3.5 w-3.5 text-gray-400" />
+              </button>
+              {switcherOpen && (
+                <div className="absolute right-0 top-full mt-1.5 w-56 bg-white border border-gray-200 rounded-xl shadow-xl z-50 overflow-hidden">
+                  <div className="px-3 py-2 border-b border-gray-100">
+                    <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Switch company</p>
+                  </div>
+                  {companies.map((c) => (
+                    <button
+                      key={c.id}
+                      disabled={switching || c.id === activeCompanyId}
+                      onClick={() => handleSwitch(c.id, c.name)}
+                      className={`w-full text-left px-4 py-2.5 text-sm hover:bg-gray-50 ${
+                        c.id === activeCompanyId ? "font-semibold text-emerald-700 bg-emerald-50/60" : "text-gray-700"
+                      }`}
+                    >
+                      {c.name}
+                      {c.id === activeCompanyId && <span className="ml-2 text-xs text-emerald-500">● Active</span>}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
         </header>
 
-        <main className="flex-1 p-4 lg:p-6 overflow-auto">{children}</main>
+        <main className="flex-1 p-5 lg:p-7 overflow-auto">{children}</main>
       </div>
     </div>
   );

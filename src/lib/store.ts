@@ -11,14 +11,21 @@ import type {
   EmployeeTypeDocRule,
   Onboarding,
   AuditLog,
+  Job,
+  Candidate,
+  InterviewRound,
+  OfferLetter,
+  Employee,
 } from "./types";
 
 const DATA_DIR = path.join(/* turbopackIgnore: true */ process.cwd(), "data");
 const UPLOADS_DIR = path.join(DATA_DIR, "uploads");
 const TEMPLATES_DIR = path.join(DATA_DIR, "templates");
+const RESUMES_DIR = path.join(DATA_DIR, "resumes");
+const OFFERS_DIR = path.join(DATA_DIR, "offers");
 
 // Ensure directories exist
-for (const dir of [DATA_DIR, UPLOADS_DIR, TEMPLATES_DIR]) {
+for (const dir of [DATA_DIR, UPLOADS_DIR, TEMPLATES_DIR, RESUMES_DIR, OFFERS_DIR]) {
   if (!fs.existsSync(dir)) {
     fs.mkdirSync(dir, { recursive: true });
   }
@@ -95,6 +102,20 @@ export const templatesStore = createStore<DocumentTemplate>("templates");
 export const docRulesStore = createStore<EmployeeTypeDocRule>("docRules");
 export const onboardingsStore = createStore<Onboarding>("onboardings");
 export const auditLogsStore = createStore<AuditLog>("auditLogs");
+export const jobsStore = createStore<Job>("jobs");
+export const candidatesStore = createStore<Candidate>("candidates");
+export const interviewsStore = createStore<InterviewRound>("interviews");
+export const offersStore = createStore<OfferLetter>("offers");
+export const employeesStore = createStore<Employee>("employees");
+
+/** Generate next employee ID: prefix (first 3 chars of company name uppercased) + zero-padded sequence */
+export function generateEmployeeId(companyId: string): string {
+  const company = companiesStore.getById(companyId);
+  const prefix = (company?.name ?? "EMP").replace(/[^A-Za-z]/g, "").toUpperCase().slice(0, 3) || "EMP";
+  const existing = employeesStore.find((e) => e.companyId === companyId);
+  const seq = existing.length + 1;
+  return `${prefix}${String(seq).padStart(3, "0")}`;
+}
 
 // ---- File helpers ----
 
@@ -125,4 +146,34 @@ export function getUploadedFilePath(
   fileName: string
 ): string {
   return path.join(UPLOADS_DIR, onboardingId, fileName);
+}
+
+export function saveResumeFile(
+  candidateId: string,
+  fileName: string,
+  buffer: Buffer
+): string {
+  const dir = path.join(RESUMES_DIR, candidateId);
+  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+  const filePath = path.join(dir, fileName);
+  fs.writeFileSync(filePath, buffer);
+  return filePath;
+}
+
+export function getResumeFilePath(candidateId: string, fileName: string): string {
+  return path.join(RESUMES_DIR, candidateId, fileName);
+}
+
+export function getResumesDir(): string {
+  return RESUMES_DIR;
+}
+
+export function saveOfferPdf(offerId: string, buffer: Buffer): string {
+  const filePath = path.join(OFFERS_DIR, `${offerId}.pdf`);
+  fs.writeFileSync(filePath, buffer);
+  return filePath;
+}
+
+export function getOfferPdfPath(offerId: string): string {
+  return path.join(OFFERS_DIR, `${offerId}.pdf`);
 }

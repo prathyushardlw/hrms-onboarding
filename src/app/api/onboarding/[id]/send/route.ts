@@ -15,8 +15,8 @@ export async function POST(
   const onboarding = onboardingsStore.getById(id);
   if (!onboarding) return notFound("Onboarding not found");
 
-  if (onboarding.status !== "initiated") {
-    return badRequest("Onboarding package has already been sent");
+  if (!["initiated", "sent", "in_progress"].includes(onboarding.status)) {
+    return badRequest("Cannot resend invitation for onboarding in this status");
   }
 
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
@@ -43,7 +43,7 @@ export async function POST(
   }
 
   onboardingsStore.update(id, {
-    status: "sent",
+    status: onboarding.status === "initiated" ? "sent" : onboarding.status,
     updatedAt: new Date().toISOString(),
   });
 

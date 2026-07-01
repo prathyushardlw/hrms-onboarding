@@ -84,7 +84,7 @@ export const registerSchema = z.object({
   email: z.string().email(),
   password: z.string().min(6),
   role: z.enum(["admin", "hr", "viewer"]).default("hr"),
-  companyId: z.string().min(1),
+  companyIds: z.array(z.string().min(1)).min(1, "At least one company is required"),
 });
 
 // ---- Correction request ----

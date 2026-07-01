@@ -1,5 +1,5 @@
-// Seed script — run with: npx ts-node --esm src/lib/seed.ts
-// Or call POST /api/seed from the browser during development
+// Seed script — call POST /api/seed from the browser during development
+// Use POST /api/seed?reset=true to wipe and reseed
 
 import { v4 as uuidv4 } from "uuid";
 import { hashPassword } from "./auth";
@@ -17,35 +17,101 @@ import type {
   PdfFormField,
 } from "./types";
 
-export async function seedData() {
-  // Only seed if empty
-  if (companiesStore.getAll().length > 0) {
-    return { message: "Data already seeded" };
+export async function seedData(force = false) {
+  // Only seed if empty (unless force reset)
+  if (!force && companiesStore.getAll().length > 0) {
+    return { message: "Data already seeded. Use ?reset=true to reseed." };
+  }
+
+  if (force) {
+    // Wipe all collections before reseeding
+    companiesStore.getAll().forEach((c) => companiesStore.delete(c.id));
+    usersStore.getAll().forEach((u) => usersStore.delete(u.id));
+    templatesStore.getAll().forEach((t) => templatesStore.delete(t.id));
+    docRulesStore.getAll().forEach((r) => docRulesStore.delete(r.id));
   }
 
   const now = new Date().toISOString();
 
-  // ---- Company ----
-  const company: Company = {
-    id: uuidv4(),
-    name: "MLX",
-    createdAt: now,
-    updatedAt: now,
-  };
-  companiesStore.create(company);
+  // ---- Companies ----
+  const companyDefs = [
+    { name: "Tekreant" },
+    { name: "MLX" },
+    { name: "Labsquire" },
+    { name: "Testgo" },
+  ];
 
-  // ---- Admin user ----
-  const adminUser: User = {
+  const companies: Company[] = companyDefs.map((def) => ({
     id: uuidv4(),
-    name: "MLX Admin",
-    email: "admin@mlx.com",
-    passwordHash: await hashPassword("password123"),
-    role: "admin",
-    companyId: company.id,
+    name: def.name,
+    isActive: true,
+    createdAt: now,
+    updatedAt: now,
+  }));
+  companies.forEach((c) => companiesStore.create(c));
+
+  const [tekreant, mlx, labsquire, testgo] = companies;
+
+  // ---- Super Admin (platform-level, sees all companies) ----
+  const superAdmin: User = {
+    id: uuidv4(),
+    name: "Prathyusha R",
+    email: "prathyusha.r@testgo.com",
+    passwordHash: await hashPassword("Admin@1234"),
+    role: "super_admin",
+    companyIds: [], // empty = access all
     createdAt: now,
     updatedAt: now,
   };
-  usersStore.create(adminUser);
+  usersStore.create(superAdmin);
+
+  // ---- HR Admin per company ----
+  const hrAdmins: User[] = [
+    {
+      id: uuidv4(),
+      name: "Tekreant Admin",
+      email: "admin@tekreant.com",
+      passwordHash: await hashPassword("password123"),
+      role: "admin",
+      companyIds: [tekreant.id],
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      id: uuidv4(),
+      name: "MLX Admin",
+      email: "admin@mlx.com",
+      passwordHash: await hashPassword("password123"),
+      role: "admin",
+      companyIds: [mlx.id],
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      id: uuidv4(),
+      name: "Labsquire Admin",
+      email: "admin@labsquire.com",
+      passwordHash: await hashPassword("password123"),
+      role: "admin",
+      companyIds: [labsquire.id],
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      id: uuidv4(),
+      name: "Testgo Admin",
+      email: "admin@testgo.com",
+      passwordHash: await hashPassword("password123"),
+      role: "admin",
+      companyIds: [testgo.id],
+      createdAt: now,
+      updatedAt: now,
+    },
+  ];
+  hrAdmins.forEach((u) => usersStore.create(u));
+
+  // Use MLX as the reference company for seeding templates & doc rules
+  const company = mlx;
 
   // ---- Document templates ----
   const templateDefs = [
@@ -184,8 +250,9 @@ export async function seedData() {
 
   return {
     message: "Seed complete",
-    company: company.name,
-    user: { email: adminUser.email, password: "password123" },
+    companies: companies.map((c) => c.name),
+    superAdmin: { email: superAdmin.email, password: "Admin@1234" },
+    hrAdmins: hrAdmins.map((u) => ({ email: u.email, password: "password123", company: u.companyIds[0] })),
     templates: templates.length,
     rules: rules.length,
   };
