@@ -1,57 +1,55 @@
 import { NextRequest } from "next/server";
-import { jobsStore, candidatesStore } from "@/lib/store";
-import { getAuthFromRequest, unauthorized, forbidden, badRequest, notFound, ok } from "@/lib/api-helpers";
+import { v4 as uuidv4 } from "uuid";
+import { jobsStore } from "@/lib/store";
+import { getAuthFromRequest, unauthorized, badRequest, ok, created, resolveCompanyId } from "@/lib/api-helpers";
+import type { Job } from "@/lib/types";
 
-type Params = { params: Promise<{ id: string }> };
-
-export async function GET(req: NextRequest, { params }: Params) {
+export async function GET(req: NextRequest) {
   const auth = getAuthFromRequest(req);
   if (!auth) return unauthorized();
 
-  const { id } = await params;
-  const job = jobsStore.getById(id);
-  if (!job) return notFound("Job not found");
+  const { searchParams } = new URL(req.url);
+  const companyId = resolveCompanyId(auth, searchParams.get("companyId"));
+  const status = searchParams.get("status");
 
-  // scope check
-  if (auth.role !== "super_admin" && !auth.companyIds.includes(job.companyId)) return forbidden();
+  let jobs = await jobsStore.getAll();
+  if (companyId) jobs = jobs.filter((j) => j.companyId === companyId);
+  if (status) jobs = jobs.filter((j) => j.status === status);
 
-  return ok(job);
+  jobs.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  return ok(jobs);
 }
 
-export async function PATCH(req: NextRequest, { params }: Params) {
+export async function POST(req: NextRequest) {
   const auth = getAuthFromRequest(req);
   if (!auth || !["super_admin", "admin", "hr"].includes(auth.role)) return unauthorized();
 
-  const { id } = await params;
-  const job = jobsStore.getById(id);
-  if (!job) return notFound("Job not found");
-  if (auth.role !== "super_admin" && !auth.companyIds.includes(job.companyId)) return forbidden();
-
   const body = await req.json();
-  const allowed = ["title", "department", "employmentType", "location", "description", "requiredSkills", "status"];
-  const updates: Record<string, unknown> = { updatedAt: new Date().toISOString() };
-  for (const key of allowed) {
-    if (body[key] !== undefined) updates[key] = body[key];
-  }
+  const { title, department, employmentType, location, description, requiredSkills, companyId } = body;
 
-  if (updates.status && !["draft", "open", "closed"].includes(updates.status as string)) {
-    return badRequest("Invalid status");
-  }
+  if (!title?.trim()) return badRequest("Job title is required");
+  if (!department?.trim()) return badRequest("Department is required");
+  if (!location?.trim()) return badRequest("Location is required");
 
-  return ok(jobsStore.update(id, updates));
-}
+  const resolvedCompanyId = companyId ?? auth.activeCompanyId;
+  if (!resolvedCompanyId) return badRequest("Company is required");
 
-export async function DELETE(req: NextRequest, { params }: Params) {
-  const auth = getAuthFromRequest(req);
-  if (!auth || !["super_admin", "admin"].includes(auth.role)) return unauthorized();
+  const now = new Date().toISOString();
+  const job: Job = {
+    id: uuidv4(),
+    companyId: resolvedCompanyId,
+    title: title.trim(),
+    department: department.trim(),
+    employmentType: employmentType ?? "full-time",
+    location: location.trim(),
+    description: description?.trim() ?? "",
+    requiredSkills: Array.isArray(requiredSkills) ? requiredSkills.filter(Boolean) : [],
+    status: "open",
+    createdBy: auth.userId,
+    createdAt: now,
+    updatedAt: now,
+  };
 
-  const { id } = await params;
-  const job = jobsStore.getById(id);
-  if (!job) return notFound("Job not found");
-  if (auth.role !== "super_admin" && !auth.companyIds.includes(job.companyId)) return forbidden();
-
-  // remove all candidates for this job too
-  candidatesStore.find((c) => c.jobId === id).forEach((c) => candidatesStore.delete(c.id));
-  jobsStore.delete(id);
-  return ok({ deleted: true });
+  await jobsStore.create(job);
+  return created(job);
 }

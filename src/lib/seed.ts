@@ -1,4 +1,4 @@
-// Seed script — call POST /api/seed from the browser during development
+// Seed script â€” call POST /api/seed from the browser during development
 // Use POST /api/seed?reset=true to wipe and reseed
 
 import { v4 as uuidv4 } from "uuid";
@@ -19,16 +19,16 @@ import type {
 
 export async function seedData(force = false) {
   // Only seed if empty (unless force reset)
-  if (!force && companiesStore.getAll().length > 0) {
+  if (!force && (await companiesStore.getAll()).length > 0) {
     return { message: "Data already seeded. Use ?reset=true to reseed." };
   }
 
   if (force) {
     // Wipe all collections before reseeding
-    companiesStore.getAll().forEach((c) => companiesStore.delete(c.id));
-    usersStore.getAll().forEach((u) => usersStore.delete(u.id));
-    templatesStore.getAll().forEach((t) => templatesStore.delete(t.id));
-    docRulesStore.getAll().forEach((r) => docRulesStore.delete(r.id));
+    for (const c of await companiesStore.getAll()) await companiesStore.delete(c.id);
+    for (const u of await usersStore.getAll()) await usersStore.delete(u.id);
+    for (const t of await templatesStore.getAll()) await templatesStore.delete(t.id);
+    for (const r of await docRulesStore.getAll()) await docRulesStore.delete(r.id);
   }
 
   const now = new Date().toISOString();
@@ -48,7 +48,7 @@ export async function seedData(force = false) {
     createdAt: now,
     updatedAt: now,
   }));
-  companies.forEach((c) => companiesStore.create(c));
+  for (const c of companies) await companiesStore.create(c);
 
   const [tekreant, mlx, labsquire, testgo] = companies;
 
@@ -63,7 +63,7 @@ export async function seedData(force = false) {
     createdAt: now,
     updatedAt: now,
   };
-  usersStore.create(superAdmin);
+  await usersStore.create(superAdmin);
 
   // ---- HR Admin per company ----
   const hrAdmins: User[] = [
@@ -108,7 +108,7 @@ export async function seedData(force = false) {
       updatedAt: now,
     },
   ];
-  hrAdmins.forEach((u) => usersStore.create(u));
+  for (const u of hrAdmins) await usersStore.create(u);
 
   // Use MLX as the reference company for seeding templates & doc rules
   const company = mlx;
@@ -186,7 +186,7 @@ export async function seedData(force = false) {
     updatedAt: now,
   }));
 
-  templates.forEach((t) => templatesStore.create(t));
+  for (const t of templates) await templatesStore.create(t);
 
   // ---- Doc rules by employment type ----
   const findTemplate = (name: string) =>
@@ -246,7 +246,7 @@ export async function seedData(force = false) {
     },
   ];
 
-  rules.forEach((r) => docRulesStore.create(r));
+  for (const r of rules) await docRulesStore.create(r);
 
   return {
     message: "Seed complete",

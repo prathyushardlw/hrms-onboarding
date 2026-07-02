@@ -1,37 +1,28 @@
-import { NextRequest, NextResponse } from "next/server";
-import { onboardingsStore, templatesStore } from "@/lib/store";
+import { NextRequest } from "next/server";
+import { switchCompany } from "@/lib/auth";
+import { companiesStore } from "@/lib/store";
+import {
+  getAuthFromRequest,
+  unauthorized,
+  badRequest,
+  ok,
+} from "@/lib/api-helpers";
 
-function getOnboardingByToken(token: string) {
-  const results = onboardingsStore.find((o) => o.accessToken === token);
-  if (results.length === 0) return null;
-  const onboarding = results[0];
-  if (new Date(onboarding.tokenExpiresAt) < new Date()) return null;
-  return onboarding;
-}
+export async function POST(req: NextRequest) {
+  const auth = getAuthFromRequest(req);
+  if (!auth) return unauthorized();
 
-// GET — return form fields config for a document's template
-export async function GET(
-  req: NextRequest,
-  { params }: { params: Promise<{ token: string; docId: string }> }
-) {
-  const { token, docId } = await params;
-  const onboarding = getOnboardingByToken(token);
-  if (!onboarding) {
-    return NextResponse.json({ success: false, error: "Invalid or expired link" }, { status: 404 });
+  const body = await req.json();
+  const { companyId } = body;
+  if (!companyId) return badRequest("companyId is required");
+
+  const company = await companiesStore.getById(companyId);
+  if (!company || !company.isActive) return badRequest("Company not found or inactive");
+
+  try {
+    const token = await switchCompany(auth.userId, companyId);
+    return ok({ token, activeCompanyId: companyId, companyName: company.name });
+  } catch (err) {
+    return badRequest((err as Error).message);
   }
-
-  const doc = onboarding.documents.find((d) => d.id === docId);
-  if (!doc) {
-    return NextResponse.json({ success: false, error: "Document not found" }, { status: 404 });
-  }
-
-  const template = templatesStore.find((t) => t.id === doc.templateId)[0];
-  return NextResponse.json({
-    success: true,
-    data: {
-      formFields: template?.formFields || [],
-      signatureFields: template?.signatureFields || [],
-      hasRealTemplate: !!(template?.fileName),
-    },
-  });
 }

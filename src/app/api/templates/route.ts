@@ -12,7 +12,7 @@ export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const companyId = resolveCompanyId(auth, searchParams.get("companyId"));
 
-  let templates = templatesStore.getAll();
+  let templates = await templatesStore.getAll();
   if (companyId) {
     templates = templates.filter((t) => t.companyId === companyId);
   }
@@ -48,7 +48,7 @@ export async function POST(req: NextRequest) {
       updatedAt: now,
     };
 
-    templatesStore.create(template);
+    await templatesStore.create(template);
     return created(template);
   } catch (error) {
     return badRequest((error as Error).message);

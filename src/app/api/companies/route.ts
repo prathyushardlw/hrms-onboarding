@@ -10,7 +10,7 @@ export async function GET(req: NextRequest) {
   if (!auth) return unauthorized();
 
   // Regular users only see their accessible companies
-  let companies = companiesStore.getAll().filter((c) => c.isActive);
+  let companies = (await companiesStore.getAll()).filter((c) => c.isActive);
   if (auth.role !== "super_admin") {
     companies = companies.filter((c) => auth.companyIds.includes(c.id));
   }
@@ -38,7 +38,7 @@ export async function POST(req: NextRequest) {
       updatedAt: now,
     };
 
-    companiesStore.create(company);
+    await companiesStore.create(company);
     return created(company);
   } catch (error) {
     return badRequest((error as Error).message);

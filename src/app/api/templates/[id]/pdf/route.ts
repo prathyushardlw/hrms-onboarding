@@ -1,29 +1,56 @@
-import { NextRequest, NextResponse } from "next/server";
-import { templatesStore, getTemplatesDir } from "@/lib/store";
-import { getAuthFromRequest, unauthorized, notFound } from "@/lib/api-helpers";
-import path from "path";
-import fs from "fs";
+import { NextRequest } from "next/server";
+import { templatesStore } from "@/lib/store";
+import { createTemplateSchema } from "@/lib/validations";
+import { getAuthFromRequest, unauthorized, badRequest, ok, created, notFound, resolveCompanyId } from "@/lib/api-helpers";
+import { v4 as uuidv4 } from "uuid";
+import type { DocumentTemplate } from "@/lib/types";
 
-export async function GET(
-  req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function GET(req: NextRequest) {
   const auth = getAuthFromRequest(req);
   if (!auth) return unauthorized();
 
-  const { id } = await params;
-  const template = templatesStore.getById(id);
-  if (!template) return notFound("Template not found");
-  if (!template.fileName) return notFound("No PDF file uploaded for this template");
+  const { searchParams } = new URL(req.url);
+  const companyId = resolveCompanyId(auth, searchParams.get("companyId"));
 
-  const filePath = path.join(getTemplatesDir(), template.fileName);
-  if (!fs.existsSync(filePath)) return notFound("PDF file not found on disk");
+  let templates = await templatesStore.getAll();
+  if (companyId) {
+    templates = templates.filter((t) => t.companyId === companyId);
+  }
 
-  const buffer = fs.readFileSync(filePath);
-  return new NextResponse(buffer, {
-    headers: {
-      "Content-Type": "application/pdf",
-      "Content-Disposition": `inline; filename="${template.fileName}"`,
-    },
-  });
+  return ok(templates.filter((t) => t.isActive));
+}
+
+export async function POST(req: NextRequest) {
+  const auth = getAuthFromRequest(req);
+  if (!auth || !["super_admin", "admin", "hr"].includes(auth.role)) return unauthorized();
+
+  try {
+    const body = await req.json();
+    const parsed = createTemplateSchema.safeParse(body);
+    if (!parsed.success) {
+      return badRequest(parsed.error.issues[0].message);
+    }
+
+    const now = new Date().toISOString();
+    const template: DocumentTemplate = {
+      id: uuidv4(),
+      companyId: parsed.data.companyId,
+      name: parsed.data.name,
+      category: parsed.data.category,
+      fileName: "",
+      templateType: parsed.data.templateType,
+      placeholders: parsed.data.placeholders,
+      signatureFields: parsed.data.signatureFields,
+      documentAction: parsed.data.documentAction || "sign_and_return",
+      uploadRequired: parsed.data.uploadRequired,
+      isActive: true,
+      createdAt: now,
+      updatedAt: now,
+    };
+
+    await templatesStore.create(template);
+    return created(template);
+  } catch (error) {
+    return badRequest((error as Error).message);
+  }
 }

@@ -12,7 +12,7 @@ export async function GET(req: NextRequest) {
   const companyId = resolveCompanyId(auth, searchParams.get("companyId"));
   const status = searchParams.get("status");
 
-  let jobs = jobsStore.getAll();
+  let jobs = await jobsStore.getAll();
   if (companyId) jobs = jobs.filter((j) => j.companyId === companyId);
   if (status) jobs = jobs.filter((j) => j.status === status);
 
@@ -50,6 +50,6 @@ export async function POST(req: NextRequest) {
     updatedAt: now,
   };
 
-  jobsStore.create(job);
+  await jobsStore.create(job);
   return created(job);
 }

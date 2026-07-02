@@ -1,55 +1,44 @@
 import { NextRequest } from "next/server";
+import { v4 as uuidv4 } from "uuid";
 import { companiesStore } from "@/lib/store";
 import {
   getAuthFromRequest,
   unauthorized,
   forbidden,
   badRequest,
-  notFound,
   ok,
+  created,
   isSuperAdmin,
 } from "@/lib/api-helpers";
+import type { Company } from "@/lib/types";
 
-export async function PATCH(
-  req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function GET(req: NextRequest) {
   const auth = getAuthFromRequest(req);
   if (!auth) return unauthorized();
   if (!isSuperAdmin(auth)) return forbidden();
 
-  const { id } = await params;
-  const company = companiesStore.getById(id);
-  if (!company) return notFound("Company not found");
-
-  const body = await req.json();
-  const updates: Partial<typeof company> = { updatedAt: new Date().toISOString() };
-  if (body.name !== undefined) updates.name = body.name.trim();
-  if (body.logo !== undefined) updates.logo = body.logo;
-  if (body.isActive !== undefined) updates.isActive = Boolean(body.isActive);
-
-  if (!updates.name && body.name !== undefined) return badRequest("Name cannot be empty");
-
-  const updated = companiesStore.update(id, updates);
-  return ok(updated);
+  const companies = await companiesStore.getAll();
+  return ok(companies);
 }
 
-export async function DELETE(
-  req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function POST(req: NextRequest) {
   const auth = getAuthFromRequest(req);
   if (!auth) return unauthorized();
   if (!isSuperAdmin(auth)) return forbidden();
 
-  const { id } = await params;
-  const company = companiesStore.getById(id);
-  if (!company) return notFound("Company not found");
+  const body = await req.json();
+  if (!body.name?.trim()) return badRequest("Company name is required");
 
-  // Soft delete — set inactive instead of removing
-  const updated = companiesStore.update(id, {
-    isActive: false,
-    updatedAt: new Date().toISOString(),
-  });
-  return ok(updated);
+  const now = new Date().toISOString();
+  const company: Company = {
+    id: uuidv4(),
+    name: body.name.trim(),
+    logo: body.logo ?? undefined,
+    isActive: true,
+    createdAt: now,
+    updatedAt: now,
+  };
+
+  await companiesStore.create(company);
+  return created(company);
 }

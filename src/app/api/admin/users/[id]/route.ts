@@ -1,57 +1,49 @@
 import { NextRequest } from "next/server";
 import { usersStore } from "@/lib/store";
+import { registerUser } from "@/lib/auth";
 import {
   getAuthFromRequest,
   unauthorized,
   forbidden,
   badRequest,
-  notFound,
   ok,
+  created,
   isSuperAdmin,
 } from "@/lib/api-helpers";
+import type { UserRole } from "@/lib/types";
 
-export async function PATCH(
-  req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function GET(req: NextRequest) {
   const auth = getAuthFromRequest(req);
   if (!auth) return unauthorized();
   if (!isSuperAdmin(auth)) return forbidden();
 
-  const { id } = await params;
-  const user = usersStore.getById(id);
-  if (!user) return notFound("User not found");
-
-  const body = await req.json();
-  const updates: Record<string, unknown> = { updatedAt: new Date().toISOString() };
-
-  if (body.name !== undefined) updates.name = body.name.trim();
-  if (body.companyIds !== undefined) {
-    if (!Array.isArray(body.companyIds)) return badRequest("companyIds must be an array");
-    updates.companyIds = body.companyIds;
-  }
-  if (body.role !== undefined) {
-    const validRoles = ["admin", "hr", "viewer"];
-    if (!validRoles.includes(body.role)) return badRequest("Invalid role");
-    updates.role = body.role;
-  }
-
-  const updated = usersStore.update(id, updates);
-  const { passwordHash: _, ...safe } = updated!;
-  return ok(safe);
+  const users = (await usersStore.getAll()).map(({ passwordHash: _, ...u }) => u);
+  return ok(users);
 }
 
-export async function DELETE(
-  req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function POST(req: NextRequest) {
   const auth = getAuthFromRequest(req);
   if (!auth) return unauthorized();
   if (!isSuperAdmin(auth)) return forbidden();
 
-  const { id } = await params;
-  if (!usersStore.getById(id)) return notFound("User not found");
+  const body = await req.json();
+  const { name, email, password, role, companyIds } = body;
 
-  usersStore.delete(id);
-  return ok({ deleted: true });
+  if (!name?.trim()) return badRequest("Name is required");
+  if (!email?.trim()) return badRequest("Email is required");
+  if (!password || password.length < 6) return badRequest("Password must be at least 6 characters");
+
+  const validRoles: UserRole[] = ["admin", "hr", "viewer"];
+  if (!validRoles.includes(role)) return badRequest("Invalid role. Use: admin, hr, viewer");
+
+  if (!Array.isArray(companyIds) || companyIds.length === 0) {
+    return badRequest("companyIds must be a non-empty array");
+  }
+
+  try {
+    const user = await registerUser(name.trim(), email.trim(), password, role, companyIds);
+    return created(user);
+  } catch (err) {
+    return badRequest((err as Error).message);
+  }
 }

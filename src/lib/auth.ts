@@ -47,7 +47,7 @@ export async function registerUser(
   role: UserRole,
   companyIds: string[]
 ): Promise<Omit<User, "passwordHash">> {
-  const existing = usersStore.find((u) => u.email === email);
+  const existing = await usersStore.find((u) => u.email === email);
   if (existing.length > 0) {
     throw new Error("User with this email already exists");
   }
@@ -65,7 +65,7 @@ export async function registerUser(
     updatedAt: now,
   };
 
-  usersStore.create(user);
+  await usersStore.create(user);
   const { passwordHash: _, ...safe } = user;
   return safe;
 }
@@ -74,7 +74,7 @@ export async function loginUser(
   email: string,
   password: string
 ): Promise<{ user: Omit<User, "passwordHash">; token: string }> {
-  const users = usersStore.find((u) => u.email === email);
+  const users = await usersStore.find((u) => u.email === email);
   if (users.length === 0) {
     throw new Error("Invalid email or password");
   }
@@ -102,7 +102,7 @@ export async function switchCompany(
   userId: string,
   targetCompanyId: string
 ): Promise<string> {
-  const users = usersStore.find((u) => u.id === userId);
+  const users = await usersStore.find((u) => u.id === userId);
   if (users.length === 0) throw new Error("User not found");
   const user = users[0];
 

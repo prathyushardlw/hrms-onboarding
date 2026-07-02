@@ -17,7 +17,7 @@ export async function POST(req: NextRequest) {
     // Resolve active company name for the frontend
     const activeCompanyId = user.companyIds[0] ?? null;
     const activeCompanyName = activeCompanyId
-      ? (companiesStore.getById(activeCompanyId)?.name ?? null)
+      ? ((await companiesStore.getById(activeCompanyId))?.name ?? null)
       : null;
 
     return ok({ user, token, activeCompanyId, activeCompanyName });

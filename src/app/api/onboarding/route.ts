@@ -26,7 +26,7 @@ export async function GET(req: NextRequest) {
   // Enforce company scope from JWT (super_admin can optionally filter)
   const companyId = resolveCompanyId(auth, searchParams.get("companyId"));
 
-  let onboardings = onboardingsStore.getAll();
+  let onboardings = await onboardingsStore.getAll();
 
   if (companyId) onboardings = onboardings.filter((o) => o.companyId === companyId);
   if (status) onboardings = onboardings.filter((o) => o.status === status);
@@ -61,20 +61,22 @@ export async function POST(req: NextRequest) {
     const { documentTemplateIds, ...data } = parsed.data;
 
     // Build document list from selected templates
-    const documents: OnboardingDocument[] = documentTemplateIds.map(
-      (templateId) => {
-        const template = templatesStore.getById(templateId);
-        const action = template?.documentAction || "sign_and_return";
-        return {
-          id: uuidv4(),
-          templateId,
-          name: template?.name || "Unknown Document",
-          required: action !== "read_only",
-          uploadRequired: template?.uploadRequired ?? false,
-          documentAction: action,
-          status: action === "read_only" ? "signed" as const : "pending" as const,
-        };
-      }
+    const documents: OnboardingDocument[] = await Promise.all(
+      documentTemplateIds.map(
+        async (templateId) => {
+          const template = await templatesStore.getById(templateId);
+          const action = template?.documentAction || "sign_and_return";
+          return {
+            id: uuidv4(),
+            templateId,
+            name: template?.name || "Unknown Document",
+            required: action !== "read_only",
+            uploadRequired: template?.uploadRequired ?? false,
+            documentAction: action,
+            status: action === "read_only" ? "signed" as const : "pending" as const,
+          };
+        }
+      )
     );
 
     const { token, expiresAt } = generateAccessToken();
@@ -100,9 +102,9 @@ export async function POST(req: NextRequest) {
       updatedAt: now,
     };
 
-    onboardingsStore.create(onboarding);
+    await onboardingsStore.create(onboarding);
 
-    logAuditEvent({
+    await logAuditEvent({
       onboardingId: onboarding.id,
       event: "created",
       performedBy: { type: "hr", id: auth.userId },

@@ -13,7 +13,7 @@ export async function GET(req: NextRequest) {
   const employmentType = searchParams.get("employmentType");
   const companyId = resolveCompanyId(auth, searchParams.get("companyId"));
 
-  let rules = docRulesStore.getAll();
+  let rules = await docRulesStore.getAll();
   if (companyId) rules = rules.filter((r) => r.companyId === companyId);
   if (employmentType) rules = rules.filter((r) => r.employmentType === employmentType);
 
@@ -39,7 +39,7 @@ export async function POST(req: NextRequest) {
       updatedAt: now,
     };
 
-    docRulesStore.create(rule);
+    await docRulesStore.create(rule);
     return created(rule);
   } catch (error) {
     return badRequest((error as Error).message);

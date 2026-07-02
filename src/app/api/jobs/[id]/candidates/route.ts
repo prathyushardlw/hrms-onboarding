@@ -1,80 +1,55 @@
 import { NextRequest } from "next/server";
 import { v4 as uuidv4 } from "uuid";
-import { jobsStore, candidatesStore, saveResumeFile } from "@/lib/store";
-import { getAuthFromRequest, unauthorized, forbidden, badRequest, notFound, ok, created } from "@/lib/api-helpers";
-import type { Candidate } from "@/lib/types";
+import { jobsStore } from "@/lib/store";
+import { getAuthFromRequest, unauthorized, badRequest, ok, created, resolveCompanyId } from "@/lib/api-helpers";
+import type { Job } from "@/lib/types";
 
-type Params = { params: Promise<{ id: string }> };
-
-export async function GET(req: NextRequest, { params }: Params) {
+export async function GET(req: NextRequest) {
   const auth = getAuthFromRequest(req);
   if (!auth) return unauthorized();
 
-  const { id: jobId } = await params;
-  const job = jobsStore.getById(jobId);
-  if (!job) return notFound("Job not found");
-  if (auth.role !== "super_admin" && !auth.companyIds.includes(job.companyId)) return forbidden();
-
   const { searchParams } = new URL(req.url);
+  const companyId = resolveCompanyId(auth, searchParams.get("companyId"));
   const status = searchParams.get("status");
 
-  let candidates = candidatesStore.find((c) => c.jobId === jobId);
-  if (status) candidates = candidates.filter((c) => c.status === status);
-  candidates.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  let jobs = await jobsStore.getAll();
+  if (companyId) jobs = jobs.filter((j) => j.companyId === companyId);
+  if (status) jobs = jobs.filter((j) => j.status === status);
 
-  return ok(candidates);
+  jobs.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  return ok(jobs);
 }
 
-export async function POST(req: NextRequest, { params }: Params) {
+export async function POST(req: NextRequest) {
   const auth = getAuthFromRequest(req);
   if (!auth || !["super_admin", "admin", "hr"].includes(auth.role)) return unauthorized();
 
-  const { id: jobId } = await params;
-  const job = jobsStore.getById(jobId);
-  if (!job) return notFound("Job not found");
-  if (auth.role !== "super_admin" && !auth.companyIds.includes(job.companyId)) return forbidden();
+  const body = await req.json();
+  const { title, department, employmentType, location, description, requiredSkills, companyId } = body;
 
-  const formData = await req.formData();
+  if (!title?.trim()) return badRequest("Job title is required");
+  if (!department?.trim()) return badRequest("Department is required");
+  if (!location?.trim()) return badRequest("Location is required");
 
-  const name = (formData.get("name") as string)?.trim();
-  const email = (formData.get("email") as string)?.trim();
-  if (!name) return badRequest("Candidate name is required");
-  if (!email) return badRequest("Candidate email is required");
+  const resolvedCompanyId = companyId ?? auth.activeCompanyId;
+  if (!resolvedCompanyId) return badRequest("Company is required");
 
   const now = new Date().toISOString();
-  const candidateId = uuidv4();
-
-  // Handle resume upload
-  let resumeFileName: string | undefined;
-  const resumeFile = formData.get("resume") as File | null;
-  if (resumeFile && resumeFile.size > 0) {
-    const ext = resumeFile.name.split(".").pop() ?? "pdf";
-    resumeFileName = `resume_${Date.now()}.${ext}`;
-    const buffer = Buffer.from(await resumeFile.arrayBuffer());
-    saveResumeFile(candidateId, resumeFileName, buffer);
-  }
-
-  const candidate: Candidate = {
-    id: candidateId,
-    jobId,
-    companyId: job.companyId,
-    name,
-    email,
-    phone: (formData.get("phone") as string) || undefined,
-    source: (formData.get("source") as Candidate["source"]) ?? "other",
-    resumeFileName,
-    currentCompany: (formData.get("currentCompany") as string) || undefined,
-    currentDesignation: (formData.get("currentDesignation") as string) || undefined,
-    expectedSalary: (formData.get("expectedSalary") as string) || undefined,
-    noticePeriod: (formData.get("noticePeriod") as string) || undefined,
-    linkedinUrl: (formData.get("linkedinUrl") as string) || undefined,
-    portfolioUrl: (formData.get("portfolioUrl") as string) || undefined,
-    status: "new",
-    notes: (formData.get("notes") as string) || undefined,
+  const job: Job = {
+    id: uuidv4(),
+    companyId: resolvedCompanyId,
+    title: title.trim(),
+    department: department.trim(),
+    employmentType: employmentType ?? "full-time",
+    location: location.trim(),
+    description: description?.trim() ?? "",
+    requiredSkills: Array.isArray(requiredSkills) ? requiredSkills.filter(Boolean) : [],
+    status: "open",
+    createdBy: auth.userId,
     createdAt: now,
     updatedAt: now,
   };
 
-  candidatesStore.create(candidate);
-  return created(candidate);
+  await jobsStore.create(job);
+  return created(job);
 }

@@ -1,32 +1,28 @@
-import { NextRequest, NextResponse } from "next/server";
-import { candidatesStore, getResumeFilePath } from "@/lib/store";
-import { getAuthFromRequest, unauthorized, forbidden, notFound } from "@/lib/api-helpers";
-import fs from "fs";
-import path from "path";
+import { NextRequest } from "next/server";
+import { switchCompany } from "@/lib/auth";
+import { companiesStore } from "@/lib/store";
+import {
+  getAuthFromRequest,
+  unauthorized,
+  badRequest,
+  ok,
+} from "@/lib/api-helpers";
 
-type Params = { params: Promise<{ id: string }> };
-
-export async function GET(req: NextRequest, { params }: Params) {
+export async function POST(req: NextRequest) {
   const auth = getAuthFromRequest(req);
   if (!auth) return unauthorized();
 
-  const { id } = await params;
-  const candidate = candidatesStore.getById(id);
-  if (!candidate) return notFound("Candidate not found");
-  if (auth.role !== "super_admin" && !auth.companyIds.includes(candidate.companyId)) return forbidden();
-  if (!candidate.resumeFileName) return notFound("No resume uploaded");
+  const body = await req.json();
+  const { companyId } = body;
+  if (!companyId) return badRequest("companyId is required");
 
-  const filePath = getResumeFilePath(id, candidate.resumeFileName);
-  if (!fs.existsSync(filePath)) return notFound("Resume file not found");
+  const company = await companiesStore.getById(companyId);
+  if (!company || !company.isActive) return badRequest("Company not found or inactive");
 
-  const buffer = fs.readFileSync(filePath);
-  const ext = path.extname(candidate.resumeFileName).toLowerCase();
-  const contentType = ext === ".pdf" ? "application/pdf" : "application/octet-stream";
-
-  return new NextResponse(buffer, {
-    headers: {
-      "Content-Type": contentType,
-      "Content-Disposition": `attachment; filename="${candidate.name.replace(/\s+/g, "_")}_resume${ext}"`,
-    },
-  });
+  try {
+    const token = await switchCompany(auth.userId, companyId);
+    return ok({ token, activeCompanyId: companyId, companyName: company.name });
+  } catch (err) {
+    return badRequest((err as Error).message);
+  }
 }

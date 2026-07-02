@@ -1,41 +1,47 @@
 import { NextRequest } from "next/server";
 import { docRulesStore } from "@/lib/store";
-import { getAuthFromRequest, unauthorized, forbidden, badRequest, notFound, ok } from "@/lib/api-helpers";
+import { createDocRuleSchema } from "@/lib/validations";
+import { getAuthFromRequest, unauthorized, badRequest, ok, created, resolveCompanyId } from "@/lib/api-helpers";
+import { v4 as uuidv4 } from "uuid";
+import type { EmployeeTypeDocRule } from "@/lib/types";
 
-type Params = { params: Promise<{ id: string }> };
-
-export async function PUT(req: NextRequest, { params }: Params) {
+export async function GET(req: NextRequest) {
   const auth = getAuthFromRequest(req);
-  if (!auth || !["super_admin", "admin"].includes(auth.role)) return unauthorized();
+  if (!auth) return unauthorized();
 
-  const { id } = await params;
-  const rule = docRulesStore.getById(id);
-  if (!rule) return notFound("Doc rule not found");
-  if (auth.role !== "super_admin" && !auth.companyIds.includes(rule.companyId)) return forbidden();
+  const { searchParams } = new URL(req.url);
+  const employmentType = searchParams.get("employmentType");
+  const companyId = resolveCompanyId(auth, searchParams.get("companyId"));
 
-  const body = await req.json();
-  if (!Array.isArray(body.requiredDocuments) || !Array.isArray(body.optionalDocuments)) {
-    return badRequest("requiredDocuments and optionalDocuments must be arrays");
-  }
+  let rules = await docRulesStore.getAll();
+  if (companyId) rules = rules.filter((r) => r.companyId === companyId);
+  if (employmentType) rules = rules.filter((r) => r.employmentType === employmentType);
 
-  const updated = docRulesStore.update(id, {
-    requiredDocuments: body.requiredDocuments,
-    optionalDocuments: body.optionalDocuments,
-    updatedAt: new Date().toISOString(),
-  });
-
-  return ok(updated);
+  return ok(rules);
 }
 
-export async function DELETE(req: NextRequest, { params }: Params) {
+export async function POST(req: NextRequest) {
   const auth = getAuthFromRequest(req);
-  if (!auth || !["super_admin", "admin"].includes(auth.role)) return unauthorized();
+  if (!auth || !["super_admin", "admin", "hr"].includes(auth.role)) return unauthorized();
 
-  const { id } = await params;
-  const rule = docRulesStore.getById(id);
-  if (!rule) return notFound("Doc rule not found");
-  if (auth.role !== "super_admin" && !auth.companyIds.includes(rule.companyId)) return forbidden();
+  try {
+    const body = await req.json();
+    const parsed = createDocRuleSchema.safeParse(body);
+    if (!parsed.success) {
+      return badRequest(parsed.error.issues[0].message);
+    }
 
-  docRulesStore.delete(id);
-  return ok({ id });
+    const now = new Date().toISOString();
+    const rule: EmployeeTypeDocRule = {
+      id: uuidv4(),
+      ...parsed.data,
+      createdAt: now,
+      updatedAt: now,
+    };
+
+    await docRulesStore.create(rule);
+    return created(rule);
+  } catch (error) {
+    return badRequest((error as Error).message);
+  }
 }

@@ -16,7 +16,7 @@ export async function POST(req: NextRequest) {
   const { companyId } = body;
   if (!companyId) return badRequest("companyId is required");
 
-  const company = companiesStore.getById(companyId);
+  const company = await companiesStore.getById(companyId);
   if (!company || !company.isActive) return badRequest("Company not found or inactive");
 
   try {

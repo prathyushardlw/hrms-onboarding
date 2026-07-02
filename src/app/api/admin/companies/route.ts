@@ -17,7 +17,7 @@ export async function GET(req: NextRequest) {
   if (!auth) return unauthorized();
   if (!isSuperAdmin(auth)) return forbidden();
 
-  const companies = companiesStore.getAll();
+  const companies = await companiesStore.getAll();
   return ok(companies);
 }
 
@@ -39,6 +39,6 @@ export async function POST(req: NextRequest) {
     updatedAt: now,
   };
 
-  companiesStore.create(company);
+  await companiesStore.create(company);
   return created(company);
 }

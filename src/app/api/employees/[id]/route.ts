@@ -1,49 +1,32 @@
 import { NextRequest } from "next/server";
 import { employeesStore } from "@/lib/store";
 import {
-  getAuthFromRequest, unauthorized, forbidden, badRequest, notFound, ok,
+  getAuthFromRequest, unauthorized, ok, resolveCompanyId,
 } from "@/lib/api-helpers";
 
-type Params = { params: Promise<{ id: string }> };
-
-export async function GET(req: NextRequest, { params }: Params) {
+export async function GET(req: NextRequest) {
   const auth = getAuthFromRequest(req);
   if (!auth) return unauthorized();
 
-  const { id } = await params;
-  const employee = employeesStore.getById(id);
-  if (!employee) return notFound("Employee not found");
-  if (auth.role !== "super_admin" && !auth.companyIds.includes(employee.companyId)) return forbidden();
+  const { searchParams } = new URL(req.url);
+  const companyId = resolveCompanyId(auth, searchParams.get("companyId"));
+  const status = searchParams.get("status");
+  const search = searchParams.get("search")?.toLowerCase();
 
-  return ok(employee);
-}
-
-export async function PATCH(req: NextRequest, { params }: Params) {
-  const auth = getAuthFromRequest(req);
-  if (!auth || !["super_admin", "admin", "hr"].includes(auth.role)) return unauthorized();
-
-  const { id } = await params;
-  const employee = employeesStore.getById(id);
-  if (!employee) return notFound("Employee not found");
-  if (auth.role !== "super_admin" && !auth.companyIds.includes(employee.companyId)) return forbidden();
-
-  const body = await req.json();
-  const allowed = [
-    "name", "phone", "address", "dateOfBirth",
-    "department", "designation", "employmentType", "joiningDate", "managerId",
-    "status", "ctc", "bankName", "accountNumber", "ifscCode",
-    "emergencyContactName", "emergencyContactPhone", "emergencyContactRelation",
-  ];
-  const updates: Record<string, unknown> = { updatedAt: new Date().toISOString() };
-
-  for (const key of allowed) {
-    if (body[key] !== undefined) updates[key] = body[key];
+  let employees = await employeesStore.getAll();
+  if (companyId) employees = employees.filter((e) => e.companyId === companyId);
+  if (status) employees = employees.filter((e) => e.status === status);
+  if (search) {
+    employees = employees.filter(
+      (e) =>
+        e.name.toLowerCase().includes(search) ||
+        e.email.toLowerCase().includes(search) ||
+        e.employeeId.toLowerCase().includes(search) ||
+        e.department.toLowerCase().includes(search) ||
+        e.designation.toLowerCase().includes(search)
+    );
   }
 
-  const validStatuses = ["active", "probation", "notice", "resigned", "terminated"];
-  if (updates.status && !validStatuses.includes(updates.status as string)) {
-    return badRequest("Invalid status");
-  }
-
-  return ok(employeesStore.update(id, updates));
+  employees.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  return ok(employees);
 }

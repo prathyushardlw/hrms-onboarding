@@ -1,92 +1,116 @@
 import { NextRequest } from "next/server";
-import { onboardingsStore, companiesStore } from "@/lib/store";
+import { v4 as uuidv4 } from "uuid";
+import { onboardingsStore, templatesStore, companiesStore } from "@/lib/store";
+import { createOnboardingSchema } from "@/lib/validations";
+import { generateAccessToken } from "@/lib/auth";
 import { logAuditEvent } from "@/lib/audit";
-import { sendEmail, buildCorrectionEmail } from "@/lib/email";
-import { correctionRequestSchema } from "@/lib/validations";
-import { getAuthFromRequest, unauthorized, ok, notFound, badRequest } from "@/lib/api-helpers";
-import type { OnboardingDocument } from "@/lib/types";
+import { sendEmail, buildOnboardingEmail } from "@/lib/email";
+import {
+  getAuthFromRequest,
+  unauthorized,
+  badRequest,
+  ok,
+  created,
+  resolveCompanyId,
+} from "@/lib/api-helpers";
+import type { Onboarding, OnboardingDocument } from "@/lib/types";
 
-export async function POST(
-  req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function GET(req: NextRequest) {
   const auth = getAuthFromRequest(req);
-  if (!auth || !["admin", "hr"].includes(auth.role)) return unauthorized();
+  if (!auth) return unauthorized();
 
-  const { id } = await params;
-  const onboarding = onboardingsStore.getById(id);
-  if (!onboarding) return notFound("Onboarding not found");
+  const { searchParams } = new URL(req.url);
+  const status = searchParams.get("status");
+  const search = searchParams.get("search")?.toLowerCase();
+
+  // Enforce company scope from JWT (super_admin can optionally filter)
+  const companyId = resolveCompanyId(auth, searchParams.get("companyId"));
+
+  let onboardings = await onboardingsStore.getAll();
+
+  if (companyId) onboardings = onboardings.filter((o) => o.companyId === companyId);
+  if (status) onboardings = onboardings.filter((o) => o.status === status);
+  if (search) {
+    onboardings = onboardings.filter(
+      (o) =>
+        o.candidate.name.toLowerCase().includes(search) ||
+        o.candidate.email.toLowerCase().includes(search) ||
+        o.department.toLowerCase().includes(search)
+    );
+  }
+
+  // Sort newest first
+  onboardings.sort(
+    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+  );
+
+  return ok(onboardings);
+}
+
+export async function POST(req: NextRequest) {
+  const auth = getAuthFromRequest(req);
+  if (!auth || !["super_admin", "admin", "hr"].includes(auth.role)) return unauthorized();
 
   try {
     const body = await req.json();
-    const parsed = correctionRequestSchema.safeParse(body);
+    const parsed = createOnboardingSchema.safeParse(body);
     if (!parsed.success) {
       return badRequest(parsed.error.issues[0].message);
     }
 
-    const { documentIds, note } = parsed.data;
+    const { documentTemplateIds, ...data } = parsed.data;
 
-    const updatedDocs = onboarding.documents.map((doc: OnboardingDocument) =>
-      documentIds.includes(doc.id)
-        ? { ...doc, status: "correction_requested" as const, correctionNote: note }
-        : doc
+    // Build document list from selected templates
+    const documents: OnboardingDocument[] = await Promise.all(
+      documentTemplateIds.map(
+        async (templateId) => {
+          const template = await templatesStore.getById(templateId);
+          const action = template?.documentAction || "sign_and_return";
+          return {
+            id: uuidv4(),
+            templateId,
+            name: template?.name || "Unknown Document",
+            required: action !== "read_only",
+            uploadRequired: template?.uploadRequired ?? false,
+            documentAction: action,
+            status: action === "read_only" ? "signed" as const : "pending" as const,
+          };
+        }
+      )
     );
 
-    onboardingsStore.update(id, {
-      documents: updatedDocs,
-      status: "in_progress",
-      updatedAt: new Date().toISOString(),
-    });
+    const { token, expiresAt } = generateAccessToken();
+    const now = new Date().toISOString();
 
-    const documentNames = onboarding.documents
-      .filter((d: OnboardingDocument) => documentIds.includes(d.id))
-      .map((d: OnboardingDocument) => d.name);
-
-    logAuditEvent({
-      onboardingId: id,
-      event: "correction_requested",
-      performedBy: { type: "hr", id: auth.userId },
-      metadata: { documentIds, documentNames, note },
-    });
-
-    // Send correction email to candidate
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
-    const onboardingLink = `${appUrl}/onboard/${onboarding.accessToken}`;
-    const company = companiesStore.getById(onboarding.companyId);
-    const companyName = company?.name || "the company";
-
-    const { subject, html } = buildCorrectionEmail(
-      onboarding.candidate.name,
-      documentNames,
-      note,
-      onboardingLink,
-      companyName
-    );
-
-    let emailSent = false;
-    try {
-      emailSent = await sendEmail({
-        to: onboarding.candidate.email,
-        subject,
-        html,
-      });
-    } catch (err) {
-      console.error("SMTP send failed for correction email:", err);
-    }
-
-    return ok({
-      message: "Correction requested",
-      emailSent,
-      compose: emailSent ? undefined : {
-        to: onboarding.candidate.email,
-        subject,
-        candidateName: onboarding.candidate.name,
-        documentNames,
-        note,
-        link: `${appUrl}/r/${id}`,
-        companyName,
+    const onboarding: Onboarding = {
+      id: uuidv4(),
+      companyId: data.companyId,
+      candidate: {
+        ...data.candidate,
+        name: `${data.candidate.firstName} ${data.candidate.lastName}`,
       },
+      employmentType: data.employmentType,
+      department: data.department,
+      designation: data.designation,
+      joiningDate: data.joiningDate,
+      status: "initiated",
+      accessToken: token,
+      tokenExpiresAt: expiresAt,
+      documents,
+      createdBy: auth.userId,
+      createdAt: now,
+      updatedAt: now,
+    };
+
+    await onboardingsStore.create(onboarding);
+
+    await logAuditEvent({
+      onboardingId: onboarding.id,
+      event: "created",
+      performedBy: { type: "hr", id: auth.userId },
     });
+
+    return created(onboarding);
   } catch (error) {
     return badRequest((error as Error).message);
   }

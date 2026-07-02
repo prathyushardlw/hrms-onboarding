@@ -13,7 +13,7 @@ export async function GET(req: NextRequest) {
   const status = searchParams.get("status");
   const search = searchParams.get("search")?.toLowerCase();
 
-  let employees = employeesStore.getAll();
+  let employees = await employeesStore.getAll();
   if (companyId) employees = employees.filter((e) => e.companyId === companyId);
   if (status) employees = employees.filter((e) => e.status === status);
   if (search) {

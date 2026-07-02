@@ -17,7 +17,7 @@ export async function GET(req: NextRequest) {
   if (!auth) return unauthorized();
   if (!isSuperAdmin(auth)) return forbidden();
 
-  const users = usersStore.getAll().map(({ passwordHash: _, ...u }) => u);
+  const users = (await usersStore.getAll()).map(({ passwordHash: _, ...u }) => u);
   return ok(users);
 }
 
