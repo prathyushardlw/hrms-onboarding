@@ -1,117 +1,40 @@
-import { NextRequest } from "next/server";
-import { v4 as uuidv4 } from "uuid";
-import { onboardingsStore, templatesStore, companiesStore } from "@/lib/store";
-import { createOnboardingSchema } from "@/lib/validations";
-import { generateAccessToken } from "@/lib/auth";
+﻿import { NextRequest } from "next/server";
+import { onboardingsStore } from "@/lib/store";
 import { logAuditEvent } from "@/lib/audit";
-import { sendEmail, buildOnboardingEmail } from "@/lib/email";
 import {
   getAuthFromRequest,
   unauthorized,
-  badRequest,
   ok,
-  created,
-  resolveCompanyId,
+  notFound,
 } from "@/lib/api-helpers";
-import type { Onboarding, OnboardingDocument } from "@/lib/types";
 
-export async function GET(req: NextRequest) {
+export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const auth = getAuthFromRequest(req);
   if (!auth) return unauthorized();
-
-  const { searchParams } = new URL(req.url);
-  const status = searchParams.get("status");
-  const search = searchParams.get("search")?.toLowerCase();
-
-  // Enforce company scope from JWT (super_admin can optionally filter)
-  const companyId = resolveCompanyId(auth, searchParams.get("companyId"));
-
-  let onboardings = await onboardingsStore.getAll();
-
-  if (companyId) onboardings = onboardings.filter((o) => o.companyId === companyId);
-  if (status) onboardings = onboardings.filter((o) => o.status === status);
-  if (search) {
-    onboardings = onboardings.filter(
-      (o) =>
-        o.candidate.name.toLowerCase().includes(search) ||
-        o.candidate.email.toLowerCase().includes(search) ||
-        o.department.toLowerCase().includes(search)
-    );
-  }
-
-  // Sort newest first
-  onboardings.sort(
-    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-  );
-
-  return ok(onboardings);
+  const { id } = await params;
+  const onboarding = await onboardingsStore.getById(id);
+  if (!onboarding) return notFound("Onboarding not found");
+  return ok(onboarding);
 }
 
-export async function POST(req: NextRequest) {
+export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const auth = getAuthFromRequest(req);
   if (!auth || !["super_admin", "admin", "hr"].includes(auth.role)) return unauthorized();
-
-  try {
-    const body = await req.json();
-    const parsed = createOnboardingSchema.safeParse(body);
-    if (!parsed.success) {
-      return badRequest(parsed.error.issues[0].message);
-    }
-
-    const { documentTemplateIds, ...data } = parsed.data;
-
-    // Build document list from selected templates
-    const documents: OnboardingDocument[] = await Promise.all(
-      documentTemplateIds.map(
-        async (templateId) => {
-          const template = await templatesStore.getById(templateId);
-          const action = template?.documentAction || "sign_and_return";
-          return {
-            id: uuidv4(),
-            templateId,
-            name: template?.name || "Unknown Document",
-            required: action !== "read_only",
-            uploadRequired: template?.uploadRequired ?? false,
-            documentAction: action,
-            status: action === "read_only" ? "signed" as const : "pending" as const,
-          };
-        }
-      )
-    );
-
-    const { token, expiresAt } = generateAccessToken();
-    const now = new Date().toISOString();
-
-    const onboarding: Onboarding = {
-      id: uuidv4(),
-      companyId: data.companyId,
-      candidate: {
-        ...data.candidate,
-        name: `${data.candidate.firstName} ${data.candidate.lastName}`,
-      },
-      employmentType: data.employmentType,
-      department: data.department,
-      designation: data.designation,
-      joiningDate: data.joiningDate,
-      status: "initiated",
-      accessToken: token,
-      tokenExpiresAt: expiresAt,
-      documents,
-      createdBy: auth.userId,
-      createdAt: now,
-      updatedAt: now,
-    };
-
-    await onboardingsStore.create(onboarding);
-
-    await logAuditEvent({
-      onboardingId: onboarding.id,
-      event: "created",
-      performedBy: { type: "hr", id: auth.userId },
-    });
-
-    return created(onboarding);
-  } catch (error) {
-    return badRequest((error as Error).message);
-  }
+  const { id } = await params;
+  const body = await req.json();
+  const updated = await onboardingsStore.update(id, { ...body, updatedAt: new Date().toISOString() });
+  if (!updated) return notFound("Onboarding not found");
+  return ok(updated);
 }
+
+export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const auth = getAuthFromRequest(req);
+  if (!auth || !["super_admin", "admin"].includes(auth.role)) return unauthorized();
+  const { id } = await params;
+  const onboarding = await onboardingsStore.getById(id);
+  if (!onboarding) return notFound("Onboarding not found");
+  await logAuditEvent({ onboardingId: id, event: "deleted", performedBy: { type: "hr", id: auth.userId } });
+  await onboardingsStore.delete(id);
+  return ok({ deleted: true });
+}
+

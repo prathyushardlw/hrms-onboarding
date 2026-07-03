@@ -1,8 +1,61 @@
 import { NextRequest } from "next/server";
-import { v4 as uuidv4 } from "uuid";
-import { jobsStore } from "@/lib/store";
-import { getAuthFromRequest, unauthorized, badRequest, ok, created, resolveCompanyId } from "@/lib/api-helpers";
-import type { Job } from "@/lib/types";
+import { offersStore, candidatesStore } from "@/lib/store";
+import { ok, notFound, badRequest } from "@/lib/api-helpers";
+
+async function getOfferByToken(signToken: string) {
+  const offers = await offersStore.find((o) => o.signToken === signToken);
+  return offers[0] ?? null;
+}
+
+export async function GET(req: NextRequest, { params }: { params: Promise<{ token: string }> }) {
+  const { token } = await params;
+  const offer = await getOfferByToken(token);
+  if (!offer) return notFound("Invalid or expired offer link");
+
+  const candidate = await candidatesStore.getById(offer.candidateId);
+  return ok({
+    offer: {
+      designation: offer.designation,
+      department: offer.department,
+      ctc: offer.ctc,
+      joiningDate: offer.joiningDate,
+      additionalTerms: offer.additionalTerms,
+      status: offer.status,
+      signedAt: offer.signedAt,
+    },
+    candidate: {
+      name: candidate?.name ?? "",
+      email: candidate?.email ?? "",
+    },
+  });
+}
+
+export async function POST(req: NextRequest, { params }: { params: Promise<{ token: string }> }) {
+  const { token } = await params;
+  const offer = await getOfferByToken(token);
+  if (!offer) return notFound("Invalid or expired offer link");
+
+  if (offer.signedAt) return badRequest("Offer already signed");
+
+  const body = await req.json();
+  const { signatureDataUrl } = body;
+  if (!signatureDataUrl) return badRequest("Signature required");
+
+  const now = new Date().toISOString();
+  const ip = req.headers.get("x-forwarded-for") ?? req.headers.get("x-real-ip") ?? "";
+  const ua = req.headers.get("user-agent") ?? "";
+
+  await offersStore.update(offer.id, {
+    status: "signed",
+    signedAt: now,
+    signerIp: ip,
+    signerAgent: ua,
+    updatedAt: now,
+  });
+
+  return ok({ signedAt: now });
+}
+
 
 export async function GET(req: NextRequest) {
   const auth = getAuthFromRequest(req);

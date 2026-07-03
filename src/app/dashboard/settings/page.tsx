@@ -78,7 +78,7 @@ export default function SettingsPage() {
 
     if (existing) {
       const res = await authFetch(`/api/doc-rules/${existing.id}`, {
-        method: "PUT",
+        method: "PATCH",
         body: JSON.stringify(editState),
       });
       if (res.success) {

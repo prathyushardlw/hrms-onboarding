@@ -1,55 +1,66 @@
 import { NextRequest } from "next/server";
 import { v4 as uuidv4 } from "uuid";
-import { jobsStore } from "@/lib/store";
-import { getAuthFromRequest, unauthorized, badRequest, ok, created, resolveCompanyId } from "@/lib/api-helpers";
-import type { Job } from "@/lib/types";
+import { candidatesStore, jobsStore } from "@/lib/store";
+import { getAuthFromRequest, unauthorized, badRequest, ok, created, notFound } from "@/lib/api-helpers";
+import type { Candidate } from "@/lib/types";
 
-export async function GET(req: NextRequest) {
+export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const auth = getAuthFromRequest(req);
   if (!auth) return unauthorized();
-
-  const { searchParams } = new URL(req.url);
-  const companyId = resolveCompanyId(auth, searchParams.get("companyId"));
-  const status = searchParams.get("status");
-
-  let jobs = await jobsStore.getAll();
-  if (companyId) jobs = jobs.filter((j) => j.companyId === companyId);
-  if (status) jobs = jobs.filter((j) => j.status === status);
-
-  jobs.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-  return ok(jobs);
+  const { id: jobId } = await params;
+  const candidates = await candidatesStore.find((c) => c.jobId === jobId);
+  candidates.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  return ok(candidates);
 }
 
-export async function POST(req: NextRequest) {
+export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const auth = getAuthFromRequest(req);
   if (!auth || !["super_admin", "admin", "hr"].includes(auth.role)) return unauthorized();
+  const { id: jobId } = await params;
+  const job = await jobsStore.getById(jobId);
+  if (!job) return notFound("Job not found");
 
-  const body = await req.json();
-  const { title, department, employmentType, location, description, requiredSkills, companyId } = body;
+  const ct = req.headers.get("content-type") ?? "";
+  let name: string | undefined, email: string | undefined, phone: string | undefined,
+      source: string | undefined, currentCompany: string | undefined, currentDesignation: string | undefined,
+      expectedSalary: string | undefined, noticePeriod: string | undefined,
+      linkedinUrl: string | undefined, portfolioUrl: string | undefined, notes: string | undefined;
 
-  if (!title?.trim()) return badRequest("Job title is required");
-  if (!department?.trim()) return badRequest("Department is required");
-  if (!location?.trim()) return badRequest("Location is required");
-
-  const resolvedCompanyId = companyId ?? auth.activeCompanyId;
-  if (!resolvedCompanyId) return badRequest("Company is required");
+  if (ct.includes("application/json")) {
+    const body = await req.json();
+    ({ name, email, phone, source, currentCompany, currentDesignation, expectedSalary, noticePeriod, linkedinUrl, portfolioUrl, notes } = body);
+  } else {
+    const fd = await req.formData();
+    const g = (k: string) => fd.get(k)?.toString() || undefined;
+    name = g("name"); email = g("email"); phone = g("phone"); source = g("source");
+    currentCompany = g("currentCompany"); currentDesignation = g("currentDesignation");
+    expectedSalary = g("expectedSalary"); noticePeriod = g("noticePeriod");
+    linkedinUrl = g("linkedinUrl"); portfolioUrl = g("portfolioUrl"); notes = g("notes");
+  }
+  if (!name?.trim()) return badRequest("Candidate name is required");
+  if (!email?.trim()) return badRequest("Email is required");
 
   const now = new Date().toISOString();
-  const job: Job = {
+  const candidate: Candidate = {
     id: uuidv4(),
-    companyId: resolvedCompanyId,
-    title: title.trim(),
-    department: department.trim(),
-    employmentType: employmentType ?? "full-time",
-    location: location.trim(),
-    description: description?.trim() ?? "",
-    requiredSkills: Array.isArray(requiredSkills) ? requiredSkills.filter(Boolean) : [],
-    status: "open",
-    createdBy: auth.userId,
+    jobId,
+    companyId: job.companyId,
+    name: name.trim(),
+    email: email.trim(),
+    phone: phone?.trim() || undefined,
+    source: source || "other",
+    currentCompany: currentCompany?.trim() || undefined,
+    currentDesignation: currentDesignation?.trim() || undefined,
+    expectedSalary: expectedSalary?.trim() || undefined,
+    noticePeriod: noticePeriod?.trim() || undefined,
+    linkedinUrl: linkedinUrl?.trim() || undefined,
+    portfolioUrl: portfolioUrl?.trim() || undefined,
+    notes: notes?.trim() || undefined,
+    status: "new",
     createdAt: now,
     updatedAt: now,
   };
 
-  await jobsStore.create(job);
-  return created(job);
+  await candidatesStore.create(candidate);
+  return created(candidate);
 }

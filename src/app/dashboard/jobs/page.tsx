@@ -127,16 +127,16 @@ export default function JobsPage() {
                       {candidateCounts[job.id] ?? 0} candidate{candidateCounts[job.id] !== 1 ? "s" : ""}
                     </span>
                   </div>
-                  {job.requiredSkills.length > 0 && (
+                  {(job.requiredSkills?.length ?? 0) > 0 && (
                     <div className="flex flex-wrap gap-1.5 mt-3">
-                      {job.requiredSkills.slice(0, 5).map((skill) => (
+                      {(job.requiredSkills ?? []).slice(0, 5).map((skill) => (
                         <span key={skill} className="text-xs px-2 py-0.5 bg-gray-100 text-gray-600 rounded-md">
                           {skill}
                         </span>
                       ))}
-                      {job.requiredSkills.length > 5 && (
+                      {(job.requiredSkills?.length ?? 0) > 5 && (
                         <span className="text-xs px-2 py-0.5 bg-gray-100 text-gray-400 rounded-md">
-                          +{job.requiredSkills.length - 5} more
+                          +{(job.requiredSkills?.length ?? 0) - 5} more
                         </span>
                       )}
                     </div>

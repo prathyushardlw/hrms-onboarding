@@ -121,7 +121,7 @@ export default function OnboardingListPage() {
                       </td>
                       <td className="px-5 py-3 text-sm text-gray-600">{o.department}</td>
                       <td className="px-5 py-3 text-sm text-gray-600">
-                        {new Date(o.joiningDate).toLocaleDateString()}
+                        {o.joiningDate ? new Date(o.joiningDate).toLocaleDateString() : "—"}
                       </td>
                       <td className="px-5 py-3">
                         <span className={`inline-flex px-2.5 py-1 rounded-full text-xs font-medium ${status?.color}`}>

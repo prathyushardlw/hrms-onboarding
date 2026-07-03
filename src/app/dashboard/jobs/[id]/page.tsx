@@ -135,7 +135,7 @@ export default function JobDetailPage() {
       </div>
 
       {/* Job description + skills */}
-      {(job.description || job.requiredSkills.length > 0) && (
+      {(job.description || (job.requiredSkills?.length ?? 0) > 0) && (
         <div className="bg-white rounded-xl border border-gray-200 p-5 space-y-4">
           {job.description && (
             <div>
@@ -143,11 +143,11 @@ export default function JobDetailPage() {
               <p className="text-sm text-gray-600 whitespace-pre-wrap">{job.description}</p>
             </div>
           )}
-          {job.requiredSkills.length > 0 && (
+          {(job.requiredSkills?.length ?? 0) > 0 && (
             <div>
               <h3 className="font-semibold text-gray-800 mb-2">Required Skills</h3>
               <div className="flex flex-wrap gap-2">
-                {job.requiredSkills.map((s) => (
+                {(job.requiredSkills ?? []).map((s) => (
                   <span key={s} className="text-sm px-2.5 py-1 bg-gray-100 text-gray-700 rounded-lg">{s}</span>
                 ))}
               </div>
@@ -190,13 +190,13 @@ export default function JobDetailPage() {
         ) : (
           <div className="divide-y divide-gray-100">
             {filtered.map((c) => {
-              const statusInfo = STATUSES.find((s) => s.value === c.status)!;
+              const statusInfo = STATUSES.find((s) => s.value === c.status) ?? STATUSES[0];
               return (
                 <div key={c.id} className="px-5 py-4">
                   <div className="flex items-start gap-4">
                     {/* Avatar */}
                     <div className="h-10 w-10 rounded-full bg-green-100 text-green-700 font-semibold text-sm flex items-center justify-center flex-shrink-0">
-                      {c.name.charAt(0).toUpperCase()}
+                      {c.name?.charAt(0)?.toUpperCase() ?? "?"}
                     </div>
 
                     <div className="flex-1 min-w-0">

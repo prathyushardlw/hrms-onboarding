@@ -1,44 +1,34 @@
 import { NextRequest } from "next/server";
-import { v4 as uuidv4 } from "uuid";
 import { companiesStore } from "@/lib/store";
-import {
-  getAuthFromRequest,
-  unauthorized,
-  forbidden,
-  badRequest,
-  ok,
-  created,
-  isSuperAdmin,
-} from "@/lib/api-helpers";
-import type { Company } from "@/lib/types";
+import { getAuthFromRequest, unauthorized, forbidden, ok, notFound, isSuperAdmin } from "@/lib/api-helpers";
 
-export async function GET(req: NextRequest) {
+export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const auth = getAuthFromRequest(req);
   if (!auth) return unauthorized();
   if (!isSuperAdmin(auth)) return forbidden();
-
-  const companies = await companiesStore.getAll();
-  return ok(companies);
+  const { id } = await params;
+  const company = await companiesStore.getById(id);
+  if (!company) return notFound("Company not found");
+  return ok(company);
 }
 
-export async function POST(req: NextRequest) {
+export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const auth = getAuthFromRequest(req);
   if (!auth) return unauthorized();
   if (!isSuperAdmin(auth)) return forbidden();
-
+  const { id } = await params;
   const body = await req.json();
-  if (!body.name?.trim()) return badRequest("Company name is required");
+  const updated = await companiesStore.update(id, { ...body, updatedAt: new Date().toISOString() });
+  if (!updated) return notFound("Company not found");
+  return ok(updated);
+}
 
-  const now = new Date().toISOString();
-  const company: Company = {
-    id: uuidv4(),
-    name: body.name.trim(),
-    logo: body.logo ?? undefined,
-    isActive: true,
-    createdAt: now,
-    updatedAt: now,
-  };
-
-  await companiesStore.create(company);
-  return created(company);
+export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const auth = getAuthFromRequest(req);
+  if (!auth) return unauthorized();
+  if (!isSuperAdmin(auth)) return forbidden();
+  const { id } = await params;
+  const deleted = await companiesStore.delete(id);
+  if (!deleted) return notFound("Company not found");
+  return ok({ deleted: true });
 }

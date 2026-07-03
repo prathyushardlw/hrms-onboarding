@@ -250,11 +250,13 @@ export default function CandidatePortalPage() {
             Review each document, sign it on the PDF, then submit all documents.
           </p>
           <div className="mt-4 flex flex-wrap items-center gap-4 text-sm text-gray-600">
-            <span>{onboarding.designation}</span>
-            <span>·</span>
-            <span>{onboarding.department}</span>
-            <span>·</span>
-            <span>Joining {new Date(onboarding.joiningDate).toLocaleDateString()}</span>
+            <span>{onboarding.designation || ""}</span>
+            {onboarding.designation && <span>·</span>}
+            <span>{onboarding.department || ""}</span>
+            {onboarding.department && <span>·</span>}
+            {onboarding.joiningDate && (
+              <span>Joining {new Date(onboarding.joiningDate).toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" })}</span>
+            )}
           </div>
           <div className="mt-4 bg-gray-50 rounded-lg p-3 flex items-center justify-between">
             <span className="text-sm text-gray-600">

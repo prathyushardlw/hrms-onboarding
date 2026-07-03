@@ -1,56 +1,34 @@
 import { NextRequest } from "next/server";
 import { templatesStore } from "@/lib/store";
-import { createTemplateSchema } from "@/lib/validations";
-import { getAuthFromRequest, unauthorized, badRequest, ok, created, notFound, resolveCompanyId } from "@/lib/api-helpers";
-import { v4 as uuidv4 } from "uuid";
-import type { DocumentTemplate } from "@/lib/types";
+import { getAuthFromRequest, unauthorized, ok, notFound } from "@/lib/api-helpers";
 
-export async function GET(req: NextRequest) {
+export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const auth = getAuthFromRequest(req);
   if (!auth) return unauthorized();
-
-  const { searchParams } = new URL(req.url);
-  const companyId = resolveCompanyId(auth, searchParams.get("companyId"));
-
-  let templates = await templatesStore.getAll();
-  if (companyId) {
-    templates = templates.filter((t) => t.companyId === companyId);
-  }
-
-  return ok(templates.filter((t) => t.isActive));
+  const { id } = await params;
+  const template = await templatesStore.getById(id);
+  if (!template) return notFound("Template not found");
+  return ok(template);
 }
 
-export async function POST(req: NextRequest) {
+export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const auth = getAuthFromRequest(req);
   if (!auth || !["super_admin", "admin", "hr"].includes(auth.role)) return unauthorized();
+  const { id } = await params;
+  const body = await req.json();
+  const updated = await templatesStore.update(id, { ...body, updatedAt: new Date().toISOString() });
+  if (!updated) return notFound("Template not found");
+  return ok(updated);
+}
 
-  try {
-    const body = await req.json();
-    const parsed = createTemplateSchema.safeParse(body);
-    if (!parsed.success) {
-      return badRequest(parsed.error.issues[0].message);
-    }
+export { PATCH as PUT };
 
-    const now = new Date().toISOString();
-    const template: DocumentTemplate = {
-      id: uuidv4(),
-      companyId: parsed.data.companyId,
-      name: parsed.data.name,
-      category: parsed.data.category,
-      fileName: "",
-      templateType: parsed.data.templateType,
-      placeholders: parsed.data.placeholders,
-      signatureFields: parsed.data.signatureFields,
-      documentAction: parsed.data.documentAction || "sign_and_return",
-      uploadRequired: parsed.data.uploadRequired,
-      isActive: true,
-      createdAt: now,
-      updatedAt: now,
-    };
-
-    await templatesStore.create(template);
-    return created(template);
-  } catch (error) {
-    return badRequest((error as Error).message);
-  }
+export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const auth = getAuthFromRequest(req);
+  if (!auth || !["super_admin", "admin"].includes(auth.role)) return unauthorized();
+  const { id } = await params;
+  // Soft-delete by deactivating
+  const updated = await templatesStore.update(id, { isActive: false, updatedAt: new Date().toISOString() });
+  if (!updated) return notFound("Template not found");
+  return ok({ deleted: true });
 }

@@ -6,7 +6,7 @@ import { useAuth, useAuthFetch } from "@/context/AuthContext";
 import Link from "next/link";
 import {
   ArrowLeft, Download, Star, Plus, Trash2, CheckCircle,
-  XCircle, Clock, FileText, ExternalLink, ChevronDown, Video, MapPin,
+  XCircle, Clock, FileText, ExternalLink, ChevronDown, Video, MapPin, Send,
 } from "lucide-react";
 import type { Candidate, InterviewRound, OfferLetter, Job, MeetingType } from "@/lib/types";
 
@@ -67,6 +67,7 @@ export default function CandidateDetailPage() {
   const [showOfferForm, setShowOfferForm] = useState(false);
   const [offerForm, setOfferForm] = useState({ designation: "", department: "", ctc: "", joiningDate: "", additionalTerms: "" });
   const [savingOffer, setSavingOffer] = useState(false);
+  const [sendingOffer, setSendingOffer] = useState(false);
   const [convertingToOnboarding, setConvertingToOnboarding] = useState(false);
 
   const load = useCallback(async () => {
@@ -145,6 +146,18 @@ export default function CandidateDetailPage() {
       body: JSON.stringify({ status }),
     });
     if (res.success) setOffer(res.data);
+  };
+
+  const sendOffer = async () => {
+    setSendingOffer(true);
+    const res = await authFetch(`/api/candidates/${candidateId}/offer/send`, { method: "POST" });
+    if (res.success) {
+      setOffer(res.data.offer);
+      if (!res.data.emailSent) alert("Status updated to Sent, but the email could not be delivered. Check email configuration.");
+    } else {
+      alert(res.error ?? "Failed to send offer");
+    }
+    setSendingOffer(false);
   };
 
   const convertToOnboarding = async () => {
@@ -551,8 +564,9 @@ export default function CandidateDetailPage() {
                 )}
 
                 {offer.status === "draft" && (
-                  <button onClick={() => updateOfferStatus("sent")} className="px-4 py-2 border border-blue-200 text-blue-700 rounded-lg text-sm hover:bg-blue-50">
-                    Mark as Sent
+                  <button onClick={sendOffer} disabled={sendingOffer} className="flex items-center gap-2 px-4 py-2 border border-blue-200 text-blue-700 rounded-lg text-sm hover:bg-blue-50 disabled:opacity-50">
+                    <Send className="h-4 w-4" />
+                    {sendingOffer ? "Sending…" : "Send Offer Email"}
                   </button>
                 )}
                 {offer.status === "sent" && (

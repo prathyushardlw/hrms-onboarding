@@ -1,24 +1,16 @@
-import { NextRequest } from "next/server";
-import { templatesStore } from "@/lib/store";
-import { createTemplateSchema } from "@/lib/validations";
-import { getAuthFromRequest, unauthorized, badRequest, ok, created, notFound, resolveCompanyId } from "@/lib/api-helpers";
-import { v4 as uuidv4 } from "uuid";
-import type { DocumentTemplate } from "@/lib/types";
+import { NextRequest, NextResponse } from "next/server";
+import { onboardingsStore } from "@/lib/store";
 
-export async function GET(req: NextRequest) {
-  const auth = getAuthFromRequest(req);
-  if (!auth) return unauthorized();
-
-  const { searchParams } = new URL(req.url);
-  const companyId = resolveCompanyId(auth, searchParams.get("companyId"));
-
-  let templates = await templatesStore.getAll();
-  if (companyId) {
-    templates = templates.filter((t) => t.companyId === companyId);
+export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  const onboarding = await onboardingsStore.getById(id);
+  if (!onboarding) {
+    return NextResponse.redirect(new URL("/", req.url));
   }
-
-  return ok(templates.filter((t) => t.isActive));
+  const base = process.env.NEXT_PUBLIC_BASE_URL ?? new URL(req.url).origin;
+  return NextResponse.redirect(new URL(`/onboard/${onboarding.accessToken}`, base));
 }
+
 
 export async function POST(req: NextRequest) {
   const auth = getAuthFromRequest(req);

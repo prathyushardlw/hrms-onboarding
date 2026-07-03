@@ -3,7 +3,7 @@
 // For now, we generate simple PDFs with pdf-lib that look like real forms.
 
 import { PDFDocument, StandardFonts, rgb, PDFPage, PDFFont } from "pdf-lib";
-import type { Onboarding, OnboardingDocument, DocumentTemplate, PdfFormField } from "./types";
+import type { Onboarding, OnboardingDocument, DocumentTemplate, PdfFormField, OfferLetter } from "./types";
 import { templatesStore } from "./store";
 
 function drawField(
@@ -421,6 +421,87 @@ export async function embedFormFieldsInPdf(
       });
     }
   }
+
+  return pdfDoc.save();
+}
+
+export async function generateOfferLetterPdf(
+  offer: OfferLetter,
+  candidateName: string,
+  companyName: string
+): Promise<Uint8Array> {
+  const pdfDoc = await PDFDocument.create();
+  const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
+  const fontBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+  const page = pdfDoc.addPage([612, 792]);
+  const { width, height } = page.getSize();
+  const margin = 60;
+  let y = height - 60;
+
+  // Company header
+  page.drawText(companyName, { x: margin, y, size: 22, font: fontBold, color: rgb(0.06, 0.4, 0.18) });
+  y -= 14;
+  page.drawLine({ start: { x: margin, y }, end: { x: width - margin, y }, thickness: 1, color: rgb(0.06, 0.4, 0.18) });
+  y -= 30;
+
+  const dateStr = new Date().toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" });
+  page.drawText(dateStr, { x: margin, y, size: 10, font, color: rgb(0.45, 0.45, 0.45) });
+  y -= 36;
+
+  const title = "OFFER OF EMPLOYMENT";
+  const titleW = fontBold.widthOfTextAtSize(title, 15);
+  page.drawText(title, { x: (width - titleW) / 2, y, size: 15, font: fontBold, color: rgb(0.1, 0.1, 0.1) });
+  y -= 36;
+
+  page.drawText(`Dear ${candidateName},`, { x: margin, y, size: 11, font: fontBold, color: rgb(0.1, 0.1, 0.1) });
+  y -= 24;
+
+  const intro = `We are delighted to offer you the position of ${offer.designation} at ${companyName}. After careful consideration, we believe your skills and experience make you an excellent fit for our team. The details of your employment offer are outlined below.`;
+  for (const line of wrapText(intro, font, 10.5, width - 2 * margin)) {
+    page.drawText(line, { x: margin, y, size: 10.5, font, color: rgb(0.2, 0.2, 0.2) });
+    y -= 16;
+  }
+  y -= 14;
+
+  const rows: [string, string][] = [
+    ["Position", offer.designation],
+    ["Department", offer.department || "—"],
+    ["Compensation (CTC)", offer.ctc],
+    ["Date of Joining", new Date(offer.joiningDate).toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" })],
+  ];
+  for (const [label, value] of rows) {
+    page.drawRectangle({ x: margin, y: y - 6, width: width - 2 * margin, height: 24, color: rgb(0.95, 0.98, 0.96) });
+    page.drawText(label, { x: margin + 10, y: y + 2, size: 10, font: fontBold, color: rgb(0.1, 0.35, 0.18) });
+    page.drawText(value, { x: margin + 210, y: y + 2, size: 10, font, color: rgb(0.1, 0.1, 0.1) });
+    y -= 30;
+  }
+  y -= 14;
+
+  const clause = "This offer is contingent upon successful completion of background verification and reference checks. Your employment will be subject to the company policies and procedures communicated during onboarding. This letter constitutes the entire offer and supersedes any prior representations.";
+  for (const line of wrapText(clause, font, 10, width - 2 * margin)) {
+    page.drawText(line, { x: margin, y, size: 10, font, color: rgb(0.35, 0.35, 0.35) });
+    y -= 15;
+  }
+
+  if (offer.additionalTerms) {
+    y -= 12;
+    page.drawText("Additional Terms:", { x: margin, y, size: 10, font: fontBold, color: rgb(0.1, 0.1, 0.1) });
+    y -= 15;
+    for (const line of wrapText(offer.additionalTerms, font, 10, width - 2 * margin)) {
+      page.drawText(line, { x: margin, y, size: 10, font, color: rgb(0.35, 0.35, 0.35) });
+      y -= 15;
+    }
+  }
+
+  y -= 30;
+  page.drawText("We look forward to welcoming you to the team!", { x: margin, y, size: 11, font, color: rgb(0.1, 0.1, 0.1) });
+  y -= 50;
+
+  page.drawText("_________________________________", { x: margin, y, size: 10, font, color: rgb(0.6, 0.6, 0.6) });
+  y -= 16;
+  page.drawText("Authorised Signatory", { x: margin, y, size: 10, font, color: rgb(0.4, 0.4, 0.4) });
+  y -= 14;
+  page.drawText(companyName, { x: margin, y, size: 9, font, color: rgb(0.55, 0.55, 0.55) });
 
   return pdfDoc.save();
 }

@@ -237,6 +237,7 @@ export interface InterviewRound {
   rating?: number;         // 1–5
   recommendation?: InterviewRecommendation;
   feedback?: string;
+  emailSent?: boolean;
   createdAt: string;
   updatedAt: string;
 }

@@ -9,7 +9,6 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const [seeding, setSeeding] = useState(false);
   const { login } = useAuth();
   const router = useRouter();
 
@@ -24,24 +23,6 @@ export default function LoginPage() {
       setError((err as Error).message);
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleSeed = async () => {
-    setSeeding(true);
-    try {
-      const res = await fetch("/api/seed", { method: "POST" });
-      const data = await res.json();
-      if (data.success) {
-        setEmail("admin@mlx.com");
-        setPassword("password123");
-      } else {
-        setError(data.error || "Seed failed");
-      }
-    } catch {
-      setError("Failed to seed data");
-    } finally {
-      setSeeding(false);
     }
   };
 
@@ -139,15 +120,7 @@ export default function LoginPage() {
             </form>
           </div>
 
-          <div className="mt-5 text-center">
-            <button
-              onClick={handleSeed}
-              disabled={seeding}
-              className="text-[13px] text-gray-400 hover:text-emerald-700 transition-colors"
-            >
-              {seeding ? "Seeding…" : "↺ Initialize demo data"}
-            </button>
-          </div>
+
         </div>
       </div>
     </div>

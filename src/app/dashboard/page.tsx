@@ -128,7 +128,7 @@ export default function DashboardPage() {
                       <td className="px-6 py-3.5 text-[13px] text-gray-600">{onboarding.department}</td>
                       <td className="px-6 py-3.5 text-[13px] text-gray-600">{onboarding.designation}</td>
                       <td className="px-6 py-3.5 text-[13px] text-gray-600">
-                        {new Date(onboarding.joiningDate).toLocaleDateString()}
+                        {onboarding.joiningDate ? new Date(onboarding.joiningDate).toLocaleDateString() : "—"}
                       </td>
                       <td className="px-6 py-3.5">
                         <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-[11.5px] font-semibold ${status.color}`}>

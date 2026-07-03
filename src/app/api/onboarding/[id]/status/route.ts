@@ -1,117 +1,24 @@
-import { NextRequest } from "next/server";
-import { v4 as uuidv4 } from "uuid";
-import { onboardingsStore, templatesStore, companiesStore } from "@/lib/store";
-import { createOnboardingSchema } from "@/lib/validations";
-import { generateAccessToken } from "@/lib/auth";
+﻿import { NextRequest } from "next/server";
+import { onboardingsStore } from "@/lib/store";
 import { logAuditEvent } from "@/lib/audit";
-import { sendEmail, buildOnboardingEmail } from "@/lib/email";
-import {
-  getAuthFromRequest,
-  unauthorized,
-  badRequest,
-  ok,
-  created,
-  resolveCompanyId,
-} from "@/lib/api-helpers";
-import type { Onboarding, OnboardingDocument } from "@/lib/types";
+import { getAuthFromRequest, unauthorized, badRequest, ok, notFound } from "@/lib/api-helpers";
 
-export async function GET(req: NextRequest) {
-  const auth = getAuthFromRequest(req);
-  if (!auth) return unauthorized();
+const VALID_STATUSES = ["initiated", "sent", "in_progress", "submitted", "verified", "completed", "correction_requested"];
 
-  const { searchParams } = new URL(req.url);
-  const status = searchParams.get("status");
-  const search = searchParams.get("search")?.toLowerCase();
-
-  // Enforce company scope from JWT (super_admin can optionally filter)
-  const companyId = resolveCompanyId(auth, searchParams.get("companyId"));
-
-  let onboardings = await onboardingsStore.getAll();
-
-  if (companyId) onboardings = onboardings.filter((o) => o.companyId === companyId);
-  if (status) onboardings = onboardings.filter((o) => o.status === status);
-  if (search) {
-    onboardings = onboardings.filter(
-      (o) =>
-        o.candidate.name.toLowerCase().includes(search) ||
-        o.candidate.email.toLowerCase().includes(search) ||
-        o.department.toLowerCase().includes(search)
-    );
-  }
-
-  // Sort newest first
-  onboardings.sort(
-    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-  );
-
-  return ok(onboardings);
-}
-
-export async function POST(req: NextRequest) {
+export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const auth = getAuthFromRequest(req);
   if (!auth || !["super_admin", "admin", "hr"].includes(auth.role)) return unauthorized();
+  const { id } = await params;
+  const onboarding = await onboardingsStore.getById(id);
+  if (!onboarding) return notFound("Onboarding not found");
 
-  try {
-    const body = await req.json();
-    const parsed = createOnboardingSchema.safeParse(body);
-    if (!parsed.success) {
-      return badRequest(parsed.error.issues[0].message);
-    }
+  const body = await req.json();
+  const { status } = body;
+  if (!status || !VALID_STATUSES.includes(status)) return badRequest("Invalid status");
 
-    const { documentTemplateIds, ...data } = parsed.data;
+  const now = new Date().toISOString();
+  await onboardingsStore.update(id, { status, updatedAt: now });
+  await logAuditEvent({ onboardingId: id, event: status, performedBy: { type: "hr", id: auth.userId } });
 
-    // Build document list from selected templates
-    const documents: OnboardingDocument[] = await Promise.all(
-      documentTemplateIds.map(
-        async (templateId) => {
-          const template = await templatesStore.getById(templateId);
-          const action = template?.documentAction || "sign_and_return";
-          return {
-            id: uuidv4(),
-            templateId,
-            name: template?.name || "Unknown Document",
-            required: action !== "read_only",
-            uploadRequired: template?.uploadRequired ?? false,
-            documentAction: action,
-            status: action === "read_only" ? "signed" as const : "pending" as const,
-          };
-        }
-      )
-    );
-
-    const { token, expiresAt } = generateAccessToken();
-    const now = new Date().toISOString();
-
-    const onboarding: Onboarding = {
-      id: uuidv4(),
-      companyId: data.companyId,
-      candidate: {
-        ...data.candidate,
-        name: `${data.candidate.firstName} ${data.candidate.lastName}`,
-      },
-      employmentType: data.employmentType,
-      department: data.department,
-      designation: data.designation,
-      joiningDate: data.joiningDate,
-      status: "initiated",
-      accessToken: token,
-      tokenExpiresAt: expiresAt,
-      documents,
-      createdBy: auth.userId,
-      createdAt: now,
-      updatedAt: now,
-    };
-
-    await onboardingsStore.create(onboarding);
-
-    await logAuditEvent({
-      onboardingId: onboarding.id,
-      event: "created",
-      performedBy: { type: "hr", id: auth.userId },
-    });
-
-    return created(onboarding);
-  } catch (error) {
-    return badRequest((error as Error).message);
-  }
+  return ok({ status });
 }
