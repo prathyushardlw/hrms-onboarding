@@ -1,0 +1,628 @@
+[
+  {
+    "id": "b2937a11-a822-4344-999a-1266c3330dd3",
+    "onboardingId": "3d81fd80-dd2d-41bf-8f7a-aaf77942967f",
+    "event": "created",
+    "performedBy": {
+      "type": "hr",
+      "id": "8895a9e3-d5bb-4c79-ac5b-4e576a26827a"
+    },
+    "timestamp": "2026-06-30T15:40:42.197Z"
+  },
+  {
+    "id": "f8a8fd89-a428-4b1e-b75a-59f4cc7fd511",
+    "onboardingId": "3d81fd80-dd2d-41bf-8f7a-aaf77942967f",
+    "event": "completed",
+    "performedBy": {
+      "type": "hr",
+      "id": "8895a9e3-d5bb-4c79-ac5b-4e576a26827a"
+    },
+    "timestamp": "2026-06-30T15:40:44.657Z"
+  },
+  {
+    "id": "43ca63a4-4db2-405e-abf5-983a9657eafd",
+    "onboardingId": "3d81fd80-dd2d-41bf-8f7a-aaf77942967f",
+    "event": "completed",
+    "performedBy": {
+      "type": "hr",
+      "id": "8895a9e3-d5bb-4c79-ac5b-4e576a26827a"
+    },
+    "timestamp": "2026-06-30T15:40:44.765Z"
+  },
+  {
+    "id": "686b743e-a3da-488e-aa29-7cd08a05803a",
+    "onboardingId": "3d81fd80-dd2d-41bf-8f7a-aaf77942967f",
+    "event": "completed",
+    "performedBy": {
+      "type": "hr",
+      "id": "8895a9e3-d5bb-4c79-ac5b-4e576a26827a"
+    },
+    "timestamp": "2026-06-30T15:40:44.854Z"
+  },
+  {
+    "id": "7a72dbb0-0552-467e-a323-1d5fc552d43e",
+    "onboardingId": "3d81fd80-dd2d-41bf-8f7a-aaf77942967f",
+    "event": "verified",
+    "performedBy": {
+      "type": "hr",
+      "id": "8895a9e3-d5bb-4c79-ac5b-4e576a26827a"
+    },
+    "timestamp": "2026-06-30T15:40:44.913Z"
+  },
+  {
+    "id": "9a0af443-3288-4db9-a055-fb633196e057",
+    "onboardingId": "3d81fd80-dd2d-41bf-8f7a-aaf77942967f",
+    "event": "completed",
+    "performedBy": {
+      "type": "hr",
+      "id": "8895a9e3-d5bb-4c79-ac5b-4e576a26827a"
+    },
+    "timestamp": "2026-06-30T15:40:44.965Z"
+  },
+  {
+    "id": "fae22db0-21d5-4ad0-894b-9a210e5fd832",
+    "onboardingId": "a1603c80-c08e-41c5-9973-88720e65064a",
+    "event": "created",
+    "performedBy": {
+      "type": "hr",
+      "id": "8895a9e3-d5bb-4c79-ac5b-4e576a26827a"
+    },
+    "metadata": {
+      "source": "recruitment",
+      "candidateId": "486ae7ee-d483-4c4f-b5ed-9b323fcece2d"
+    },
+    "timestamp": "2026-07-01T18:08:34.046Z"
+  },
+  {
+    "id": "e1a5af8b-dfc1-4b39-87fb-c7983e793a9d",
+    "onboardingId": "a1603c80-c08e-41c5-9973-88720e65064a",
+    "event": "sent",
+    "performedBy": {
+      "type": "hr",
+      "id": "8895a9e3-d5bb-4c79-ac5b-4e576a26827a"
+    },
+    "metadata": {
+      "email": "prathyusha.r@labsquire.com"
+    },
+    "timestamp": "2026-07-01T18:08:42.057Z"
+  },
+  {
+    "id": "4a01e8e8-9695-4ff5-a39b-299e97909221",
+    "onboardingId": "a1603c80-c08e-41c5-9973-88720e65064a",
+    "event": "link_opened",
+    "performedBy": {
+      "type": "candidate"
+    },
+    "ipAddress": "::1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36",
+    "timestamp": "2026-07-01T18:09:11.089Z"
+  },
+  {
+    "id": "654d5b9c-2dff-40da-8001-45ace5e1f820",
+    "onboardingId": "a1603c80-c08e-41c5-9973-88720e65064a",
+    "event": "document_viewed",
+    "performedBy": {
+      "type": "candidate"
+    },
+    "metadata": {
+      "documentId": "3b57ea5f-b749-45bf-8f49-6e5c47878bfd",
+      "documentName": "I-9 Form"
+    },
+    "timestamp": "2026-07-01T18:09:18.001Z"
+  },
+  {
+    "id": "edab3894-b85d-4698-939d-58687c7ab66e",
+    "onboardingId": "a1603c80-c08e-41c5-9973-88720e65064a",
+    "event": "document_signed",
+    "performedBy": {
+      "type": "candidate"
+    },
+    "metadata": {
+      "documentId": "3b57ea5f-b749-45bf-8f49-6e5c47878bfd"
+    },
+    "timestamp": "2026-07-01T18:09:35.783Z"
+  },
+  {
+    "id": "17a70747-39a0-4b96-950d-d13e1fd35407",
+    "onboardingId": "a1603c80-c08e-41c5-9973-88720e65064a",
+    "event": "link_opened",
+    "performedBy": {
+      "type": "candidate"
+    },
+    "ipAddress": "::1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36",
+    "timestamp": "2026-07-01T18:09:35.849Z"
+  },
+  {
+    "id": "82ce864e-68c9-4891-9f52-3a3b6408b0e5",
+    "onboardingId": "a1603c80-c08e-41c5-9973-88720e65064a",
+    "event": "document_viewed",
+    "performedBy": {
+      "type": "candidate"
+    },
+    "metadata": {
+      "documentId": "7fab051f-d5df-48eb-9ecf-8673ac197293",
+      "documentName": "W-4 Form"
+    },
+    "timestamp": "2026-07-01T18:09:37.910Z"
+  },
+  {
+    "id": "67f0a2a4-51b0-40ea-8a4f-3161da551f46",
+    "onboardingId": "a1603c80-c08e-41c5-9973-88720e65064a",
+    "event": "document_viewed",
+    "performedBy": {
+      "type": "candidate"
+    },
+    "metadata": {
+      "documentId": "ef7e6799-92a0-4d10-95c5-b1a79cdf5db5",
+      "documentName": "Banking Details"
+    },
+    "timestamp": "2026-07-01T18:09:49.966Z"
+  },
+  {
+    "id": "4245c246-231e-49e6-84b4-422a19210bf2",
+    "onboardingId": "a1603c80-c08e-41c5-9973-88720e65064a",
+    "event": "sent",
+    "performedBy": {
+      "type": "hr",
+      "id": "8895a9e3-d5bb-4c79-ac5b-4e576a26827a"
+    },
+    "metadata": {
+      "email": "prathyusha.r@labsquire.com"
+    },
+    "timestamp": "2026-07-01T18:16:02.578Z"
+  },
+  {
+    "id": "b62e2836-d8dc-4443-9120-56007d24acee",
+    "onboardingId": "a1603c80-c08e-41c5-9973-88720e65064a",
+    "event": "link_opened",
+    "performedBy": {
+      "type": "candidate"
+    },
+    "ipAddress": "::1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36",
+    "timestamp": "2026-07-01T18:16:15.697Z"
+  },
+  {
+    "id": "0facdbbe-937d-4695-ae36-c268d0b51f0e",
+    "onboardingId": "a1603c80-c08e-41c5-9973-88720e65064a",
+    "event": "document_viewed",
+    "performedBy": {
+      "type": "candidate"
+    },
+    "metadata": {
+      "documentId": "7fab051f-d5df-48eb-9ecf-8673ac197293",
+      "documentName": "W-4 Form"
+    },
+    "timestamp": "2026-07-01T18:16:21.619Z"
+  },
+  {
+    "id": "f2bfb5ad-ed5b-4863-98b8-401a12cbb273",
+    "onboardingId": "a1603c80-c08e-41c5-9973-88720e65064a",
+    "event": "link_opened",
+    "performedBy": {
+      "type": "candidate"
+    },
+    "ipAddress": "::1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36",
+    "timestamp": "2026-07-01T18:21:41.829Z"
+  },
+  {
+    "id": "9df69428-c885-4387-b60d-2b7f0b5f3453",
+    "onboardingId": "a1603c80-c08e-41c5-9973-88720e65064a",
+    "event": "sent",
+    "performedBy": {
+      "type": "hr",
+      "id": "8895a9e3-d5bb-4c79-ac5b-4e576a26827a"
+    },
+    "metadata": {
+      "email": "prathyusha.r@labsquire.com"
+    },
+    "timestamp": "2026-07-01T18:21:59.024Z"
+  },
+  {
+    "id": "d3d4eb04-41cd-4851-9bd6-122543e38316",
+    "onboardingId": "a1603c80-c08e-41c5-9973-88720e65064a",
+    "event": "link_opened",
+    "performedBy": {
+      "type": "candidate"
+    },
+    "ipAddress": "::1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36",
+    "timestamp": "2026-07-01T18:22:07.821Z"
+  },
+  {
+    "id": "019a8876-c653-4248-a865-2c8009cd3901",
+    "onboardingId": "a1603c80-c08e-41c5-9973-88720e65064a",
+    "event": "link_opened",
+    "performedBy": {
+      "type": "candidate"
+    },
+    "ipAddress": "::1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36",
+    "timestamp": "2026-07-01T19:07:20.248Z"
+  },
+  {
+    "id": "70f6bbab-d35b-44e1-bb11-b0f15ee5e103",
+    "onboardingId": "a1603c80-c08e-41c5-9973-88720e65064a",
+    "event": "document_viewed",
+    "performedBy": {
+      "type": "candidate"
+    },
+    "metadata": {
+      "documentId": "7fab051f-d5df-48eb-9ecf-8673ac197293",
+      "documentName": "W-4 Form"
+    },
+    "timestamp": "2026-07-01T19:07:25.452Z"
+  },
+  {
+    "id": "8b926aa9-af78-4fe7-9ef5-f529fcb6d8a9",
+    "onboardingId": "a1603c80-c08e-41c5-9973-88720e65064a",
+    "event": "document_viewed",
+    "performedBy": {
+      "type": "candidate"
+    },
+    "metadata": {
+      "documentId": "493100a5-19f9-425c-8582-0af7b4d49e85",
+      "documentName": "Direct Deposit Form"
+    },
+    "timestamp": "2026-07-01T19:07:30.195Z"
+  },
+  {
+    "id": "32a27846-cf64-4d18-947e-34304a483a35",
+    "onboardingId": "a1603c80-c08e-41c5-9973-88720e65064a",
+    "event": "document_signed",
+    "performedBy": {
+      "type": "candidate"
+    },
+    "metadata": {
+      "documentId": "493100a5-19f9-425c-8582-0af7b4d49e85",
+      "documentName": "Direct Deposit Form"
+    },
+    "timestamp": "2026-07-01T19:07:49.646Z"
+  },
+  {
+    "id": "4cc8c181-2a34-4d08-bdd9-4740c8450269",
+    "onboardingId": "a1603c80-c08e-41c5-9973-88720e65064a",
+    "event": "link_opened",
+    "performedBy": {
+      "type": "candidate"
+    },
+    "ipAddress": "::1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36",
+    "timestamp": "2026-07-01T19:07:49.697Z"
+  },
+  {
+    "id": "74327875-79b7-48be-bdf2-684aecf8978c",
+    "onboardingId": "a1603c80-c08e-41c5-9973-88720e65064a",
+    "event": "document_viewed",
+    "performedBy": {
+      "type": "candidate"
+    },
+    "metadata": {
+      "documentId": "493100a5-19f9-425c-8582-0af7b4d49e85",
+      "documentName": "Direct Deposit Form"
+    },
+    "timestamp": "2026-07-01T19:07:52.047Z"
+  },
+  {
+    "id": "d5a6bfed-9159-4427-a27b-4334f90a0273",
+    "onboardingId": "a1603c80-c08e-41c5-9973-88720e65064a",
+    "event": "link_opened",
+    "performedBy": {
+      "type": "candidate"
+    },
+    "ipAddress": "::1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36",
+    "timestamp": "2026-07-01T20:13:26.722Z"
+  },
+  {
+    "id": "faee5c45-8aed-4328-ac51-7818b5135a7b",
+    "onboardingId": "a1603c80-c08e-41c5-9973-88720e65064a",
+    "event": "document_viewed",
+    "performedBy": {
+      "type": "candidate"
+    },
+    "metadata": {
+      "documentId": "21595bd4-ce71-4e95-9368-ffb29f6df19f",
+      "documentName": "NDA Agreement"
+    },
+    "timestamp": "2026-07-01T20:13:57.189Z"
+  },
+  {
+    "id": "567bfefa-fd8d-4132-9428-b3392e1a75ea",
+    "onboardingId": "a1603c80-c08e-41c5-9973-88720e65064a",
+    "event": "document_signed",
+    "performedBy": {
+      "type": "candidate"
+    },
+    "metadata": {
+      "documentId": "21595bd4-ce71-4e95-9368-ffb29f6df19f"
+    },
+    "timestamp": "2026-07-01T20:14:05.964Z"
+  },
+  {
+    "id": "c28289c5-c3fe-49b7-a19e-5ad25c438fff",
+    "onboardingId": "a1603c80-c08e-41c5-9973-88720e65064a",
+    "event": "link_opened",
+    "performedBy": {
+      "type": "candidate"
+    },
+    "ipAddress": "::1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36",
+    "timestamp": "2026-07-01T20:14:06.134Z"
+  },
+  {
+    "id": "9dc6208d-afb8-4c5c-8197-10c359da366b",
+    "onboardingId": "a1603c80-c08e-41c5-9973-88720e65064a",
+    "event": "document_viewed",
+    "performedBy": {
+      "type": "candidate"
+    },
+    "metadata": {
+      "documentId": "e5038d32-1caf-4f81-b6ec-dad503ba9bf6",
+      "documentName": "Employment Agreement"
+    },
+    "timestamp": "2026-07-01T20:20:17.456Z"
+  },
+  {
+    "id": "871916ff-9c3e-4cbd-a98e-96c6c4c8d35c",
+    "onboardingId": "a1603c80-c08e-41c5-9973-88720e65064a",
+    "event": "document_signed",
+    "performedBy": {
+      "type": "candidate"
+    },
+    "metadata": {
+      "documentId": "e5038d32-1caf-4f81-b6ec-dad503ba9bf6"
+    },
+    "timestamp": "2026-07-01T20:20:31.035Z"
+  },
+  {
+    "id": "d33ca5b0-653e-4c31-a32d-ef858127e3a5",
+    "onboardingId": "a1603c80-c08e-41c5-9973-88720e65064a",
+    "event": "link_opened",
+    "performedBy": {
+      "type": "candidate"
+    },
+    "ipAddress": "::1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36",
+    "timestamp": "2026-07-01T20:20:31.216Z"
+  },
+  {
+    "id": "69c41a1f-ab02-4edd-99bd-d96b8dbb435d",
+    "onboardingId": "a1603c80-c08e-41c5-9973-88720e65064a",
+    "event": "document_viewed",
+    "performedBy": {
+      "type": "candidate"
+    },
+    "metadata": {
+      "documentId": "21595bd4-ce71-4e95-9368-ffb29f6df19f",
+      "documentName": "NDA Agreement"
+    },
+    "timestamp": "2026-07-01T20:24:33.289Z"
+  },
+  {
+    "id": "27b0ca53-15a2-4345-9d01-e744819e1da8",
+    "onboardingId": "a1603c80-c08e-41c5-9973-88720e65064a",
+    "event": "document_viewed",
+    "performedBy": {
+      "type": "candidate"
+    },
+    "metadata": {
+      "documentId": "ef7e6799-92a0-4d10-95c5-b1a79cdf5db5",
+      "documentName": "Banking Details"
+    },
+    "timestamp": "2026-07-01T20:24:43.778Z"
+  },
+  {
+    "id": "88a443f6-af5c-4aed-ab02-cc6176664ad0",
+    "onboardingId": "a1603c80-c08e-41c5-9973-88720e65064a",
+    "event": "document_signed",
+    "performedBy": {
+      "type": "candidate"
+    },
+    "metadata": {
+      "documentId": "ef7e6799-92a0-4d10-95c5-b1a79cdf5db5"
+    },
+    "timestamp": "2026-07-01T20:24:48.634Z"
+  },
+  {
+    "id": "26f151f9-9090-48d5-b86c-ecc35bee1a68",
+    "onboardingId": "a1603c80-c08e-41c5-9973-88720e65064a",
+    "event": "link_opened",
+    "performedBy": {
+      "type": "candidate"
+    },
+    "ipAddress": "::1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36",
+    "timestamp": "2026-07-01T20:24:48.756Z"
+  },
+  {
+    "id": "966282a2-0839-4947-862b-14f19bda73f2",
+    "onboardingId": "a1603c80-c08e-41c5-9973-88720e65064a",
+    "event": "document_viewed",
+    "performedBy": {
+      "type": "candidate"
+    },
+    "metadata": {
+      "documentId": "899f4f96-66c4-4957-99f5-76dd863702b1",
+      "documentName": "SSN Verification"
+    },
+    "timestamp": "2026-07-01T20:25:05.279Z"
+  },
+  {
+    "id": "0aab4622-a8ca-41d4-b523-c51b1ba28200",
+    "onboardingId": "a1603c80-c08e-41c5-9973-88720e65064a",
+    "event": "document_signed",
+    "performedBy": {
+      "type": "candidate"
+    },
+    "metadata": {
+      "documentId": "899f4f96-66c4-4957-99f5-76dd863702b1"
+    },
+    "timestamp": "2026-07-01T20:25:09.395Z"
+  },
+  {
+    "id": "eb83be7e-e395-437e-a627-70a221176d54",
+    "onboardingId": "a1603c80-c08e-41c5-9973-88720e65064a",
+    "event": "link_opened",
+    "performedBy": {
+      "type": "candidate"
+    },
+    "ipAddress": "::1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36",
+    "timestamp": "2026-07-01T20:25:09.521Z"
+  },
+  {
+    "id": "d201a664-86ba-4524-9d4f-b8d88c30e9d1",
+    "onboardingId": "a1603c80-c08e-41c5-9973-88720e65064a",
+    "event": "document_viewed",
+    "performedBy": {
+      "type": "candidate"
+    },
+    "metadata": {
+      "documentId": "c576acd8-9c9d-463c-bc94-8621a723d85b",
+      "documentName": "Driver License"
+    },
+    "timestamp": "2026-07-01T20:25:11.339Z"
+  },
+  {
+    "id": "89fa114e-9dbe-4e18-b50c-3450d7dc33d4",
+    "onboardingId": "a1603c80-c08e-41c5-9973-88720e65064a",
+    "event": "document_signed",
+    "performedBy": {
+      "type": "candidate"
+    },
+    "metadata": {
+      "documentId": "c576acd8-9c9d-463c-bc94-8621a723d85b"
+    },
+    "timestamp": "2026-07-01T20:25:16.124Z"
+  },
+  {
+    "id": "688ff5a0-bf80-40a7-a871-03791c2cd407",
+    "onboardingId": "a1603c80-c08e-41c5-9973-88720e65064a",
+    "event": "link_opened",
+    "performedBy": {
+      "type": "candidate"
+    },
+    "ipAddress": "::1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36",
+    "timestamp": "2026-07-01T20:25:16.307Z"
+  },
+  {
+    "id": "ed8b1f1d-1a24-4269-9c64-588dd2941352",
+    "onboardingId": "a1603c80-c08e-41c5-9973-88720e65064a",
+    "event": "document_viewed",
+    "performedBy": {
+      "type": "candidate"
+    },
+    "metadata": {
+      "documentId": "7fab051f-d5df-48eb-9ecf-8673ac197293",
+      "documentName": "W-4 Form"
+    },
+    "timestamp": "2026-07-01T20:25:18.513Z"
+  },
+  {
+    "id": "d2c241dd-78a3-4fb2-ad1a-c4f32ccb5a2d",
+    "onboardingId": "a1603c80-c08e-41c5-9973-88720e65064a",
+    "event": "document_signed",
+    "performedBy": {
+      "type": "candidate"
+    },
+    "metadata": {
+      "documentId": "7fab051f-d5df-48eb-9ecf-8673ac197293"
+    },
+    "timestamp": "2026-07-01T20:25:29.098Z"
+  },
+  {
+    "id": "f66b5084-c82c-4a6e-b6c2-149de2d71af8",
+    "onboardingId": "a1603c80-c08e-41c5-9973-88720e65064a",
+    "event": "link_opened",
+    "performedBy": {
+      "type": "candidate"
+    },
+    "ipAddress": "::1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36",
+    "timestamp": "2026-07-01T20:25:29.213Z"
+  },
+  {
+    "id": "0f6a0f68-61f8-4098-8d5d-89251bc5f6af",
+    "onboardingId": "a1603c80-c08e-41c5-9973-88720e65064a",
+    "event": "submitted",
+    "performedBy": {
+      "type": "candidate"
+    },
+    "ipAddress": "::1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36",
+    "timestamp": "2026-07-01T20:25:35.390Z"
+  },
+  {
+    "id": "3982f273-c13a-499d-8938-6569dc1e64c8",
+    "onboardingId": "a1603c80-c08e-41c5-9973-88720e65064a",
+    "event": "link_opened",
+    "performedBy": {
+      "type": "candidate"
+    },
+    "ipAddress": "::1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36",
+    "timestamp": "2026-07-01T20:25:35.491Z"
+  },
+  {
+    "id": "4f20a235-329c-446f-bb81-4835060bd9cc",
+    "onboardingId": "a1603c80-c08e-41c5-9973-88720e65064a",
+    "event": "verified",
+    "performedBy": {
+      "type": "hr",
+      "id": "8895a9e3-d5bb-4c79-ac5b-4e576a26827a"
+    },
+    "timestamp": "2026-07-01T20:25:52.103Z"
+  },
+  {
+    "id": "4f85f3a3-c4e1-495d-9be8-178684329198",
+    "onboardingId": "a1603c80-c08e-41c5-9973-88720e65064a",
+    "event": "completed",
+    "performedBy": {
+      "type": "hr",
+      "id": "8895a9e3-d5bb-4c79-ac5b-4e576a26827a"
+    },
+    "timestamp": "2026-07-01T20:26:35.772Z"
+  },
+  {
+    "id": "6900b5b5-6b4e-4c30-8e47-ec60183d40a5",
+    "onboardingId": "a1603c80-c08e-41c5-9973-88720e65064a",
+    "event": "link_opened",
+    "performedBy": {
+      "type": "candidate"
+    },
+    "ipAddress": "::1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36",
+    "timestamp": "2026-07-01T21:35:54.431Z"
+  },
+  {
+    "id": "8fed5407-1746-405c-91e3-b6964188360c",
+    "onboardingId": "9c9be2f1-f4ab-439b-87c1-78a6b408e572",
+    "event": "created",
+    "performedBy": {
+      "type": "hr",
+      "id": "8895a9e3-d5bb-4c79-ac5b-4e576a26827a"
+    },
+    "metadata": {
+      "source": "recruitment",
+      "candidateId": "6ff5c125-eb59-4d9c-9c99-ea050a753f59"
+    },
+    "timestamp": "2026-07-02T15:18:42.764Z"
+  },
+  {
+    "id": "772ed9ed-37a9-4263-9f64-70b5fc01c4c2",
+    "onboardingId": "9c9be2f1-f4ab-439b-87c1-78a6b408e572",
+    "event": "sent",
+    "performedBy": {
+      "type": "hr",
+      "id": "8895a9e3-d5bb-4c79-ac5b-4e576a26827a"
+    },
+    "metadata": {
+      "email": "teja.z@testgo.com"
+    },
+    "timestamp": "2026-07-02T15:18:55.015Z"
+  }
+]

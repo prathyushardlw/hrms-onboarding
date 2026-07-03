@@ -1,0 +1,959 @@
+[
+  {
+    "id": "79e7405a-d477-4a94-af7d-b3bb6368c191",
+    "companyId": "7d0e83d5-0b70-42b5-9699-919b6c66db9d",
+    "name": "I-9 Form",
+    "category": "compliance",
+    "fileName": "79e7405a-d477-4a94-af7d-b3bb6368c191_Gmail_-_Onboarding_Template.pdf",
+    "templateType": "pdf",
+    "placeholders": [
+      {
+        "key": "Candidate_Name",
+        "label": "Full Name",
+        "source": "candidate.name"
+      },
+      {
+        "key": "Start_Date",
+        "label": "Start Date",
+        "source": "onboarding.joiningDate"
+      },
+      {
+        "key": "Position",
+        "label": "Position",
+        "source": "onboarding.designation"
+      }
+    ],
+    "signatureFields": [
+      {
+        "id": "32c1b2af-d14e-47be-b7e2-ec23358d974c",
+        "role": "candidate",
+        "page": 0,
+        "x": 100,
+        "y": 700,
+        "width": 200,
+        "height": 50
+      }
+    ],
+    "formFields": [],
+    "uploadRequired": false,
+    "isActive": true,
+    "createdAt": "2026-06-30T04:34:08.918Z",
+    "updatedAt": "2026-07-01T18:11:05.641Z"
+  },
+  {
+    "id": "5ad2ba45-3192-4d89-ac22-4cc3c94a3373",
+    "companyId": "7d0e83d5-0b70-42b5-9699-919b6c66db9d",
+    "name": "W-4 Form",
+    "category": "compliance",
+    "fileName": "",
+    "templateType": "pdf",
+    "placeholders": [
+      {
+        "key": "Candidate_Name",
+        "label": "Full Name",
+        "source": "candidate.name"
+      },
+      {
+        "key": "Start_Date",
+        "label": "Start Date",
+        "source": "onboarding.joiningDate"
+      },
+      {
+        "key": "Position",
+        "label": "Position",
+        "source": "onboarding.designation"
+      }
+    ],
+    "signatureFields": [
+      {
+        "id": "32c1b2af-d14e-47be-b7e2-ec23358d974c",
+        "role": "candidate",
+        "page": 0,
+        "x": 100,
+        "y": 700,
+        "width": 200,
+        "height": 50
+      }
+    ],
+    "formFields": [],
+    "uploadRequired": false,
+    "isActive": true,
+    "createdAt": "2026-06-30T04:34:08.918Z",
+    "updatedAt": "2026-06-30T04:34:08.918Z"
+  },
+  {
+    "id": "aa9ec346-f37d-4704-a9d7-e28db5ae765c",
+    "companyId": "7d0e83d5-0b70-42b5-9699-919b6c66db9d",
+    "name": "Direct Deposit Form",
+    "category": "banking",
+    "fileName": "aa9ec346-f37d-4704-a9d7-e28db5ae765c_ADP_Direct_Deposit_Form.pdf",
+    "templateType": "pdf",
+    "placeholders": [
+      {
+        "key": "Candidate_Name",
+        "label": "Full Name",
+        "source": "candidate.name"
+      },
+      {
+        "key": "Start_Date",
+        "label": "Start Date",
+        "source": "onboarding.joiningDate"
+      },
+      {
+        "key": "Position",
+        "label": "Position",
+        "source": "onboarding.designation"
+      }
+    ],
+    "signatureFields": [
+      {
+        "id": "sig_3",
+        "role": "candidate",
+        "page": 0,
+        "x": 79.40645161290323,
+        "y": 335.0258064516129,
+        "width": 207.9,
+        "height": 30
+      }
+    ],
+    "formFields": [
+      {
+        "id": "field_0",
+        "label": "Company Name",
+        "type": "text",
+        "page": 0,
+        "x": 121,
+        "y": 614,
+        "width": 150,
+        "height": 16,
+        "fontSize": 10
+      },
+      {
+        "id": "field_1",
+        "label": "Date",
+        "type": "text",
+        "page": 0,
+        "x": 504.93548387096774,
+        "y": 610.0516129032258,
+        "width": 150,
+        "height": 16,
+        "fontSize": 10
+      },
+      {
+        "id": "field_2",
+        "label": "Legal Name",
+        "type": "text",
+        "page": 0,
+        "x": 109,
+        "y": 366,
+        "width": 300,
+        "height": 16,
+        "fontSize": 10
+      },
+      {
+        "id": "field_4",
+        "label": "Date",
+        "type": "text",
+        "page": 0,
+        "x": 504.083870967742,
+        "y": 331.0774193548387,
+        "width": 120,
+        "height": 16,
+        "fontSize": 10
+      },
+      {
+        "id": "field_5",
+        "label": "Bank Name",
+        "type": "text",
+        "page": 1,
+        "x": 103,
+        "y": 648,
+        "width": 300,
+        "height": 16,
+        "fontSize": 10
+      },
+      {
+        "id": "field_6",
+        "label": "Routing #",
+        "type": "text",
+        "page": 1,
+        "x": 103,
+        "y": 627,
+        "width": 150,
+        "height": 16,
+        "fontSize": 10
+      },
+      {
+        "id": "field_7",
+        "label": "Account #",
+        "type": "text",
+        "page": 1,
+        "x": 347.38709677419354,
+        "y": 623.0516129032258,
+        "width": 150,
+        "height": 16,
+        "fontSize": 10
+      },
+      {
+        "id": "field_8",
+        "label": "Choose only one account type",
+        "type": "text",
+        "page": 1,
+        "x": 302.8387096774194,
+        "y": 582.2064516129033,
+        "width": 137,
+        "height": 16,
+        "fontSize": 10
+      },
+      {
+        "id": "field_9",
+        "label": "Amount to deposit in selected account",
+        "type": "text",
+        "page": 1,
+        "x": 516.3741935483871,
+        "y": 581.2193548387097,
+        "width": 150,
+        "height": 16,
+        "fontSize": 10
+      },
+      {
+        "id": "field_10",
+        "label": "Checking ☐ Savings $ ________________ or",
+        "type": "checkbox",
+        "page": 1,
+        "x": 33.012903225806454,
+        "y": 583.0387096774193,
+        "width": 12,
+        "height": 12
+      },
+      {
+        "id": "field_11",
+        "label": "Bank Name",
+        "type": "text",
+        "page": 1,
+        "x": 103,
+        "y": 524,
+        "width": 300,
+        "height": 16,
+        "fontSize": 10
+      },
+      {
+        "id": "field_12",
+        "label": "Routing #",
+        "type": "text",
+        "page": 1,
+        "x": 103,
+        "y": 503,
+        "width": 150,
+        "height": 16,
+        "fontSize": 10
+      },
+      {
+        "id": "field_13",
+        "label": "Account #",
+        "type": "text",
+        "page": 1,
+        "x": 343.43870967741935,
+        "y": 502.01290322580644,
+        "width": 150,
+        "height": 16,
+        "fontSize": 10
+      },
+      {
+        "id": "field_14",
+        "label": "Choose only one account type",
+        "type": "text",
+        "page": 1,
+        "x": 258.4193548387097,
+        "y": 456.2451612903226,
+        "width": 137,
+        "height": 16,
+        "fontSize": 10
+      },
+      {
+        "id": "field_15",
+        "label": "Amount to deposit in selected account",
+        "type": "text",
+        "page": 1,
+        "x": 545,
+        "y": 475,
+        "width": 150,
+        "height": 16,
+        "fontSize": 10
+      },
+      {
+        "id": "field_16",
+        "label": "Checking ☐ Savings $ ________________ or",
+        "type": "checkbox",
+        "page": 1,
+        "x": 34,
+        "y": 462,
+        "width": 12,
+        "height": 12
+      },
+      {
+        "id": "field_17",
+        "label": "Bank Name",
+        "type": "text",
+        "page": 1,
+        "x": 103,
+        "y": 401,
+        "width": 300,
+        "height": 16,
+        "fontSize": 10
+      },
+      {
+        "id": "field_18",
+        "label": "Routing #",
+        "type": "text",
+        "page": 1,
+        "x": 103,
+        "y": 379,
+        "width": 150,
+        "height": 16,
+        "fontSize": 10
+      },
+      {
+        "id": "field_19",
+        "label": "Account #",
+        "type": "text",
+        "page": 1,
+        "x": 377,
+        "y": 379,
+        "width": 150,
+        "height": 16,
+        "fontSize": 10
+      },
+      {
+        "id": "field_20",
+        "label": "Choose only one account type",
+        "type": "text",
+        "page": 1,
+        "x": 214,
+        "y": 351,
+        "width": 137,
+        "height": 16,
+        "fontSize": 10
+      },
+      {
+        "id": "field_21",
+        "label": "Amount to deposit in selected account",
+        "type": "text",
+        "page": 1,
+        "x": 545,
+        "y": 351,
+        "width": 150,
+        "height": 16,
+        "fontSize": 10
+      },
+      {
+        "id": "field_22",
+        "label": "Checking ☐ Savings $ ________________ or",
+        "type": "checkbox",
+        "page": 1,
+        "x": 34,
+        "y": 339,
+        "width": 12,
+        "height": 12
+      },
+      {
+        "id": "field_23",
+        "label": "Bank Name",
+        "type": "text",
+        "page": 1,
+        "x": 103,
+        "y": 277,
+        "width": 300,
+        "height": 16,
+        "fontSize": 10
+      },
+      {
+        "id": "field_24",
+        "label": "Routing #",
+        "type": "text",
+        "page": 1,
+        "x": 103,
+        "y": 255,
+        "width": 150,
+        "height": 16,
+        "fontSize": 10
+      },
+      {
+        "id": "field_25",
+        "label": "Account #",
+        "type": "text",
+        "page": 1,
+        "x": 377,
+        "y": 255,
+        "width": 150,
+        "height": 16,
+        "fontSize": 10
+      },
+      {
+        "id": "field_26",
+        "label": "Choose only one account type",
+        "type": "text",
+        "page": 1,
+        "x": 214,
+        "y": 227,
+        "width": 137,
+        "height": 16,
+        "fontSize": 10
+      },
+      {
+        "id": "field_27",
+        "label": "Amount to deposit in selected account",
+        "type": "text",
+        "page": 1,
+        "x": 545,
+        "y": 227,
+        "width": 150,
+        "height": 16,
+        "fontSize": 10
+      },
+      {
+        "id": "field_28",
+        "label": "Checking ☐ Savings $ ________________ or",
+        "type": "checkbox",
+        "page": 1,
+        "x": 34,
+        "y": 215,
+        "width": 12,
+        "height": 12
+      },
+      {
+        "id": "field_29",
+        "label": "*Attention Payroll Contact",
+        "type": "text",
+        "page": 1,
+        "x": 170.8,
+        "y": 162,
+        "width": 300,
+        "height": 16,
+        "fontSize": 10
+      },
+      {
+        "id": "field_1782930204407_4vjg",
+        "label": "checkbox_30",
+        "type": "checkbox",
+        "page": 1,
+        "x": 153.6580544748614,
+        "y": 577.9483877243534,
+        "width": 10,
+        "height": 10
+      }
+    ],
+    "uploadRequired": false,
+    "isActive": true,
+    "createdAt": "2026-06-30T04:34:08.918Z",
+    "updatedAt": "2026-07-02T15:19:59.001Z"
+  },
+  {
+    "id": "6378cc6f-25b3-4602-acf1-6271e78036db",
+    "companyId": "7d0e83d5-0b70-42b5-9699-919b6c66db9d",
+    "name": "NDA Agreement",
+    "category": "agreement",
+    "fileName": "",
+    "templateType": "pdf",
+    "placeholders": [
+      {
+        "key": "Candidate_Name",
+        "label": "Full Name",
+        "source": "candidate.name"
+      },
+      {
+        "key": "Start_Date",
+        "label": "Start Date",
+        "source": "onboarding.joiningDate"
+      },
+      {
+        "key": "Position",
+        "label": "Position",
+        "source": "onboarding.designation"
+      }
+    ],
+    "signatureFields": [
+      {
+        "id": "32c1b2af-d14e-47be-b7e2-ec23358d974c",
+        "role": "candidate",
+        "page": 0,
+        "x": 100,
+        "y": 700,
+        "width": 200,
+        "height": 50
+      }
+    ],
+    "formFields": [],
+    "uploadRequired": false,
+    "isActive": true,
+    "createdAt": "2026-06-30T04:34:08.918Z",
+    "updatedAt": "2026-06-30T04:34:08.918Z"
+  },
+  {
+    "id": "71769031-b50b-4455-a1b8-c5849c204866",
+    "companyId": "7d0e83d5-0b70-42b5-9699-919b6c66db9d",
+    "name": "Employment Agreement",
+    "category": "agreement",
+    "fileName": "",
+    "templateType": "pdf",
+    "placeholders": [
+      {
+        "key": "Candidate_Name",
+        "label": "Full Name",
+        "source": "candidate.name"
+      },
+      {
+        "key": "Start_Date",
+        "label": "Start Date",
+        "source": "onboarding.joiningDate"
+      },
+      {
+        "key": "Position",
+        "label": "Position",
+        "source": "onboarding.designation"
+      }
+    ],
+    "signatureFields": [
+      {
+        "id": "32c1b2af-d14e-47be-b7e2-ec23358d974c",
+        "role": "candidate",
+        "page": 0,
+        "x": 100,
+        "y": 700,
+        "width": 200,
+        "height": 50
+      }
+    ],
+    "formFields": [],
+    "uploadRequired": false,
+    "isActive": true,
+    "createdAt": "2026-06-30T04:34:08.918Z",
+    "updatedAt": "2026-06-30T04:34:08.918Z"
+  },
+  {
+    "id": "ce33e1e8-2496-4bd6-bb52-a23d44202379",
+    "companyId": "7d0e83d5-0b70-42b5-9699-919b6c66db9d",
+    "name": "Driver License",
+    "category": "identity",
+    "fileName": "",
+    "templateType": "pdf",
+    "placeholders": [
+      {
+        "key": "Candidate_Name",
+        "label": "Full Name",
+        "source": "candidate.name"
+      },
+      {
+        "key": "Start_Date",
+        "label": "Start Date",
+        "source": "onboarding.joiningDate"
+      },
+      {
+        "key": "Position",
+        "label": "Position",
+        "source": "onboarding.designation"
+      }
+    ],
+    "signatureFields": [
+      {
+        "id": "32c1b2af-d14e-47be-b7e2-ec23358d974c",
+        "role": "candidate",
+        "page": 0,
+        "x": 100,
+        "y": 700,
+        "width": 200,
+        "height": 50
+      }
+    ],
+    "formFields": [],
+    "uploadRequired": true,
+    "isActive": true,
+    "createdAt": "2026-06-30T04:34:08.918Z",
+    "updatedAt": "2026-06-30T04:34:08.918Z"
+  },
+  {
+    "id": "4307b720-5181-44dd-9b92-8ddaaa1edd4e",
+    "companyId": "7d0e83d5-0b70-42b5-9699-919b6c66db9d",
+    "name": "SSN Verification",
+    "category": "compliance",
+    "fileName": "",
+    "templateType": "pdf",
+    "placeholders": [
+      {
+        "key": "Candidate_Name",
+        "label": "Full Name",
+        "source": "candidate.name"
+      },
+      {
+        "key": "Start_Date",
+        "label": "Start Date",
+        "source": "onboarding.joiningDate"
+      },
+      {
+        "key": "Position",
+        "label": "Position",
+        "source": "onboarding.designation"
+      }
+    ],
+    "signatureFields": [
+      {
+        "id": "32c1b2af-d14e-47be-b7e2-ec23358d974c",
+        "role": "candidate",
+        "page": 0,
+        "x": 100,
+        "y": 700,
+        "width": 200,
+        "height": 50
+      }
+    ],
+    "formFields": [],
+    "uploadRequired": true,
+    "isActive": true,
+    "createdAt": "2026-06-30T04:34:08.918Z",
+    "updatedAt": "2026-06-30T04:34:08.918Z"
+  },
+  {
+    "id": "16bd480c-e12e-4c1c-9e64-d8730a011b02",
+    "companyId": "7d0e83d5-0b70-42b5-9699-919b6c66db9d",
+    "name": "Banking Details",
+    "category": "banking",
+    "fileName": "",
+    "templateType": "pdf",
+    "placeholders": [
+      {
+        "key": "Candidate_Name",
+        "label": "Full Name",
+        "source": "candidate.name"
+      },
+      {
+        "key": "Start_Date",
+        "label": "Start Date",
+        "source": "onboarding.joiningDate"
+      },
+      {
+        "key": "Position",
+        "label": "Position",
+        "source": "onboarding.designation"
+      }
+    ],
+    "signatureFields": [
+      {
+        "id": "32c1b2af-d14e-47be-b7e2-ec23358d974c",
+        "role": "candidate",
+        "page": 0,
+        "x": 100,
+        "y": 700,
+        "width": 200,
+        "height": 50
+      }
+    ],
+    "formFields": [],
+    "uploadRequired": true,
+    "isActive": true,
+    "createdAt": "2026-06-30T04:34:08.918Z",
+    "updatedAt": "2026-06-30T04:34:08.918Z"
+  },
+  {
+    "id": "0800dcd6-82bc-485f-b540-7a793c37b373",
+    "companyId": "7d0e83d5-0b70-42b5-9699-919b6c66db9d",
+    "name": "W-9 Form",
+    "category": "compliance",
+    "fileName": "0800dcd6-82bc-485f-b540-7a793c37b373_2025_w9.pdf",
+    "templateType": "pdf",
+    "placeholders": [
+      {
+        "key": "Candidate_Name",
+        "label": "Full Name",
+        "source": "candidate.name"
+      },
+      {
+        "key": "Start_Date",
+        "label": "Start Date",
+        "source": "onboarding.joiningDate"
+      },
+      {
+        "key": "Position",
+        "label": "Position",
+        "source": "onboarding.designation"
+      }
+    ],
+    "signatureFields": [
+      {
+        "id": "fde5fdd5-06c7-440f-8411-d5926f188282",
+        "role": "candidate",
+        "page": 0,
+        "x": 132.96129032258065,
+        "y": 208.81935483870967,
+        "width": 240,
+        "height": 12
+      }
+    ],
+    "formFields": [
+      {
+        "id": "97653704-fb3b-4aba-b095-c4b7b439edbd",
+        "label": "Name",
+        "type": "text",
+        "page": 0,
+        "x": 87,
+        "y": 643,
+        "width": 350,
+        "height": 16,
+        "fontSize": 11
+      },
+      {
+        "id": "d5215694-bb5e-456d-959b-dc7fbddca6a7",
+        "label": "Business name",
+        "type": "text",
+        "page": 0,
+        "x": 87,
+        "y": 618,
+        "width": 350,
+        "height": 16,
+        "fontSize": 11
+      },
+      {
+        "id": "b1bca031-d1d2-4311-a8d4-c2ece8f2cc39",
+        "label": "Individual/sole proprietor",
+        "type": "checkbox",
+        "page": 0,
+        "group": "taxClass",
+        "x": 88,
+        "y": 592,
+        "width": 10,
+        "height": 10
+      },
+      {
+        "id": "fb20cea7-3bb6-4174-806c-39ab93e70dcc",
+        "label": "C Corporation",
+        "type": "checkbox",
+        "page": 0,
+        "group": "taxClass",
+        "x": 188,
+        "y": 592,
+        "width": 10,
+        "height": 10
+      },
+      {
+        "id": "8d6f09e0-1024-4082-bc90-1c5ef5a5e3c7",
+        "label": "S Corporation",
+        "type": "checkbox",
+        "page": 0,
+        "group": "taxClass",
+        "x": 256,
+        "y": 592,
+        "width": 10,
+        "height": 10
+      },
+      {
+        "id": "bcc53691-5c89-4540-bc50-55570443cd85",
+        "label": "Partnership",
+        "type": "checkbox",
+        "page": 0,
+        "group": "taxClass",
+        "x": 324,
+        "y": 592,
+        "width": 10,
+        "height": 10
+      },
+      {
+        "id": "bb9c9824-5791-438e-a9a8-8d062d9779de",
+        "label": "Trust/estate",
+        "type": "checkbox",
+        "page": 0,
+        "group": "taxClass",
+        "x": 385,
+        "y": 592,
+        "width": 10,
+        "height": 10
+      },
+      {
+        "id": "899748b0-7efd-4030-b8cf-e962ab0c17ca",
+        "label": "LLC",
+        "type": "checkbox",
+        "page": 0,
+        "group": "taxClass",
+        "x": 88,
+        "y": 579,
+        "width": 10,
+        "height": 10
+      },
+      {
+        "id": "f59cb560-b0e0-4485-b733-0167f6d663a7",
+        "label": "LLC classification (C, S, or P)",
+        "type": "text",
+        "page": 0,
+        "x": 370,
+        "y": 577,
+        "width": 22,
+        "height": 14,
+        "fontSize": 10
+      },
+      {
+        "id": "00141238-3c97-4ce3-8a80-fd7f3de4433f",
+        "label": "Other",
+        "type": "checkbox",
+        "page": 0,
+        "group": "taxClass",
+        "x": 88,
+        "y": 545,
+        "width": 10,
+        "height": 10
+      },
+      {
+        "id": "c2668094-a367-4cd4-8a85-0eb0807002db",
+        "label": "Other (see instructions)",
+        "type": "text",
+        "page": 0,
+        "x": 170,
+        "y": 543,
+        "width": 260,
+        "height": 14,
+        "fontSize": 10
+      },
+      {
+        "id": "70195d85-d63b-41cf-a3ea-fcd2e0095d31",
+        "label": "Exempt payee code",
+        "type": "text",
+        "page": 0,
+        "x": 449,
+        "y": 565,
+        "width": 110,
+        "height": 13,
+        "fontSize": 10
+      },
+      {
+        "id": "9cfb9ed3-9c2a-4581-9337-ba01e7fa6df0",
+        "label": "FATCA code",
+        "type": "text",
+        "page": 0,
+        "x": 449,
+        "y": 530,
+        "width": 110,
+        "height": 13,
+        "fontSize": 10
+      },
+      {
+        "id": "6756473a-0477-4c1e-b3bb-7ad67e5a770d",
+        "label": "Address (street, apt.)",
+        "type": "text",
+        "page": 0,
+        "x": 87,
+        "y": 484,
+        "width": 290,
+        "height": 14,
+        "fontSize": 11
+      },
+      {
+        "id": "5c00a4c7-75ac-4038-b99a-c08175000d78",
+        "label": "City, state, ZIP",
+        "type": "text",
+        "page": 0,
+        "x": 87,
+        "y": 462,
+        "width": 290,
+        "height": 14,
+        "fontSize": 11
+      },
+      {
+        "id": "19dac0c1-d6fd-43b5-a3d1-3491bf468172",
+        "label": "Account number(s)",
+        "type": "text",
+        "page": 0,
+        "x": 87,
+        "y": 438,
+        "width": 290,
+        "height": 14,
+        "fontSize": 11
+      },
+      {
+        "id": "d4fe0742-2c1f-41f7-b652-e6cbc69c6059",
+        "label": "Requester's name and address",
+        "type": "text",
+        "page": 0,
+        "x": 388,
+        "y": 484,
+        "width": 172,
+        "height": 14,
+        "fontSize": 9
+      },
+      {
+        "id": "2c5b28f2-11d3-47db-9694-d4fcc463779e",
+        "label": "Social security number",
+        "type": "ssn",
+        "page": 0,
+        "x": 416,
+        "y": 395,
+        "width": 142,
+        "height": 20,
+        "fontSize": 12
+      },
+      {
+        "id": "4f3286a0-a8e1-4fc2-9427-c4ea26b991ed",
+        "label": "Employer identification number",
+        "type": "ein",
+        "page": 0,
+        "x": 408.10322580645163,
+        "y": 352.9612903225806,
+        "width": 142,
+        "height": 20,
+        "fontSize": 12
+      },
+      {
+        "id": "fc146f64-92c3-4b6d-83f0-2ebca3b994c0",
+        "label": "Date",
+        "type": "text",
+        "page": 0,
+        "x": 400,
+        "y": 207.83225806451614,
+        "width": 160,
+        "height": 12,
+        "fontSize": 11
+      }
+    ],
+    "uploadRequired": false,
+    "isActive": true,
+    "createdAt": "2026-06-30T04:34:08.918Z",
+    "updatedAt": "2026-07-01T18:15:34.452Z"
+  },
+  {
+    "id": "cf0690d2-8de7-453f-9b94-bec5972d15f1",
+    "companyId": "7d0e83d5-0b70-42b5-9699-919b6c66db9d",
+    "name": "Internship Agreement",
+    "category": "agreement",
+    "fileName": "",
+    "templateType": "pdf",
+    "placeholders": [
+      {
+        "key": "Candidate_Name",
+        "label": "Full Name",
+        "source": "candidate.name"
+      },
+      {
+        "key": "Start_Date",
+        "label": "Start Date",
+        "source": "onboarding.joiningDate"
+      },
+      {
+        "key": "Position",
+        "label": "Position",
+        "source": "onboarding.designation"
+      }
+    ],
+    "signatureFields": [
+      {
+        "id": "32c1b2af-d14e-47be-b7e2-ec23358d974c",
+        "role": "candidate",
+        "page": 0,
+        "x": 100,
+        "y": 700,
+        "width": 200,
+        "height": 50
+      }
+    ],
+    "formFields": [],
+    "uploadRequired": false,
+    "isActive": true,
+    "createdAt": "2026-06-30T04:34:08.918Z",
+    "updatedAt": "2026-06-30T04:34:08.918Z"
+  }
+]

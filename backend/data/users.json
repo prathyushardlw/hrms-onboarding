@@ -1,0 +1,60 @@
+[
+  {
+    "id": "ccc57c55-25af-41be-8095-1a44d4343965",
+    "name": "Prathyusha R",
+    "email": "prathyusha.r@testgo.com",
+    "passwordHash": "$2b$12$afsgWeC7JpJrY024xSx3b.FJr/vrlFDoQhVCP6jPFnTbs/fKp6tMO",
+    "role": "super_admin",
+    "companyIds": [],
+    "createdAt": "2026-06-30T04:34:08.918Z",
+    "updatedAt": "2026-06-30T04:34:08.918Z"
+  },
+  {
+    "id": "cf17ed2d-b39b-49f9-9b8a-f87dba3c0a31",
+    "name": "Tekreant Admin",
+    "email": "admin@tekreant.com",
+    "passwordHash": "$2b$12$wkCoC7B5rj1L4oH6xqojJeQIHi3v/HnUfMybs7UzhPhLrrEBzoIYO",
+    "role": "admin",
+    "companyIds": [
+      "5b86df86-e626-4ef7-8dd8-b3f2681ef094"
+    ],
+    "createdAt": "2026-06-30T04:34:08.918Z",
+    "updatedAt": "2026-06-30T04:34:08.918Z"
+  },
+  {
+    "id": "8895a9e3-d5bb-4c79-ac5b-4e576a26827a",
+    "name": "MLX Admin",
+    "email": "admin@mlx.com",
+    "passwordHash": "$2b$12$00iiPSYVGCHuMh7eoVCb0eXYHhnwZyZkVUvYHA3NFkpQsYlLqGMl.",
+    "role": "admin",
+    "companyIds": [
+      "7d0e83d5-0b70-42b5-9699-919b6c66db9d"
+    ],
+    "createdAt": "2026-06-30T04:34:08.918Z",
+    "updatedAt": "2026-06-30T04:34:08.918Z"
+  },
+  {
+    "id": "7b27443e-3210-44ec-b353-53bc04f78c87",
+    "name": "Labsquire Admin",
+    "email": "admin@labsquire.com",
+    "passwordHash": "$2b$12$XaTng2/W0KKGnMcAPjh.uex5l8YIZbDPjQgpcszhfzNuU.WdJ8Boq",
+    "role": "admin",
+    "companyIds": [
+      "6008a914-a023-48b8-88ff-e143695d8f30"
+    ],
+    "createdAt": "2026-06-30T04:34:08.918Z",
+    "updatedAt": "2026-06-30T04:34:08.918Z"
+  },
+  {
+    "id": "ffead704-bf74-4626-9b93-bcc4ca3ff40a",
+    "name": "Testgo Admin",
+    "email": "admin@testgo.com",
+    "passwordHash": "$2b$12$sv/ZQnojCmsadRFilfD.Q.z/UqlK.2Tu9OxUn0Q8enPolqqQ.A0MC",
+    "role": "admin",
+    "companyIds": [
+      "39180cf7-de6d-41f1-bfac-b4e49a84418d"
+    ],
+    "createdAt": "2026-06-30T04:34:08.918Z",
+    "updatedAt": "2026-06-30T04:34:08.918Z"
+  }
+]

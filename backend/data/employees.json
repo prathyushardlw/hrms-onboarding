@@ -1,0 +1,33 @@
+[
+  {
+    "id": "077893ac-5774-43eb-8c0d-785a2a53251b",
+    "employeeId": "MLX001",
+    "companyId": "7d0e83d5-0b70-42b5-9699-919b6c66db9d",
+    "onboardingId": "3d81fd80-dd2d-41bf-8f7a-aaf77942967f",
+    "name": "Ananya Sharma",
+    "email": "ananya@example.com",
+    "phone": "+91 98765 43210",
+    "department": "Engineering",
+    "designation": "Senior React Developer",
+    "employmentType": "full-time",
+    "joiningDate": "2026-08-01",
+    "status": "probation",
+    "createdAt": "2026-06-30T15:40:44.963Z",
+    "updatedAt": "2026-06-30T15:40:44.963Z"
+  },
+  {
+    "id": "de0e1d14-04a7-4769-a608-da5172d1e7d2",
+    "employeeId": "MLX002",
+    "companyId": "7d0e83d5-0b70-42b5-9699-919b6c66db9d",
+    "onboardingId": "a1603c80-c08e-41c5-9973-88720e65064a",
+    "name": "Prathyusha Rekapalli",
+    "email": "prathyusha.r@labsquire.com",
+    "department": "Software Engineering",
+    "designation": "SDR",
+    "employmentType": "full-time",
+    "joiningDate": "2026-07-02",
+    "status": "probation",
+    "createdAt": "2026-07-01T20:26:35.769Z",
+    "updatedAt": "2026-07-01T20:26:35.769Z"
+  }
+]

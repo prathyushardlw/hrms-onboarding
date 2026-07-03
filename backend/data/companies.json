@@ -1,0 +1,37 @@
+[
+  {
+    "id": "5b86df86-e626-4ef7-8dd8-b3f2681ef094",
+    "name": "Tekreant",
+    "isActive": true,
+    "createdAt": "2026-06-30T04:34:08.918Z",
+    "updatedAt": "2026-06-30T04:34:08.918Z"
+  },
+  {
+    "id": "7d0e83d5-0b70-42b5-9699-919b6c66db9d",
+    "name": "MLX",
+    "isActive": true,
+    "createdAt": "2026-06-30T04:34:08.918Z",
+    "updatedAt": "2026-06-30T04:34:08.918Z"
+  },
+  {
+    "id": "6008a914-a023-48b8-88ff-e143695d8f30",
+    "name": "Labsquire",
+    "isActive": true,
+    "createdAt": "2026-06-30T04:34:08.918Z",
+    "updatedAt": "2026-06-30T04:34:08.918Z"
+  },
+  {
+    "id": "39180cf7-de6d-41f1-bfac-b4e49a84418d",
+    "name": "Testgo",
+    "isActive": true,
+    "createdAt": "2026-06-30T04:34:08.918Z",
+    "updatedAt": "2026-06-30T04:34:08.918Z"
+  },
+  {
+    "id": "175fdf36-7e60-40d3-9e71-93f4c900d35e",
+    "name": "TestCorp Demo",
+    "isActive": false,
+    "createdAt": "2026-06-30T04:38:41.714Z",
+    "updatedAt": "2026-06-30T04:38:57.027Z"
+  }
+]

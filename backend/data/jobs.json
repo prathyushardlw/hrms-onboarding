@@ -1,0 +1,34 @@
+[
+  {
+    "id": "10b0ef87-a6b0-472e-8603-a7ce78bb8641",
+    "companyId": "7d0e83d5-0b70-42b5-9699-919b6c66db9d",
+    "title": "Senior React Developer",
+    "department": "Engineering",
+    "employmentType": "full-time",
+    "location": "Hyderabad / Remote",
+    "description": "We are looking for a senior React developer to join our team.",
+    "requiredSkills": [
+      "React",
+      "TypeScript",
+      "Node.js"
+    ],
+    "status": "open",
+    "createdBy": "8895a9e3-d5bb-4c79-ac5b-4e576a26827a",
+    "createdAt": "2026-06-30T04:53:59.391Z",
+    "updatedAt": "2026-06-30T04:53:59.391Z"
+  },
+  {
+    "id": "9a949db1-64ce-4be8-a929-c8e8bbcb62fd",
+    "companyId": "7d0e83d5-0b70-42b5-9699-919b6c66db9d",
+    "title": "Full Stack Developer",
+    "department": "Software Engineering",
+    "employmentType": "full-time",
+    "location": "Texas, US",
+    "description": "",
+    "requiredSkills": [],
+    "status": "open",
+    "createdBy": "8895a9e3-d5bb-4c79-ac5b-4e576a26827a",
+    "createdAt": "2026-07-01T16:55:35.820Z",
+    "updatedAt": "2026-07-01T16:55:35.820Z"
+  }
+]

@@ -1,0 +1,48 @@
+[
+  {
+    "id": "b2c14b1d-1542-4b99-94eb-7a3ae21ae1e0",
+    "candidateId": "2e93ee0a-18f8-48c8-8bd5-4b7404951a4d",
+    "jobId": "10b0ef87-a6b0-472e-8603-a7ce78bb8641",
+    "companyId": "7d0e83d5-0b70-42b5-9699-919b6c66db9d",
+    "designation": "Senior React Developer",
+    "department": "Engineering",
+    "ctc": "15 LPA",
+    "joiningDate": "2026-08-01",
+    "additionalTerms": "",
+    "status": "accepted",
+    "createdAt": "2026-06-30T15:21:00.295Z",
+    "updatedAt": "2026-06-30T15:21:09.861Z",
+    "pdfFileName": "b2c14b1d-1542-4b99-94eb-7a3ae21ae1e0.pdf"
+  },
+  {
+    "id": "b7535369-9e6f-405e-b542-281a0024c495",
+    "candidateId": "486ae7ee-d483-4c4f-b5ed-9b323fcece2d",
+    "jobId": "9a949db1-64ce-4be8-a929-c8e8bbcb62fd",
+    "companyId": "7d0e83d5-0b70-42b5-9699-919b6c66db9d",
+    "designation": "SDR",
+    "department": "Software Engineering",
+    "ctc": "80000",
+    "joiningDate": "2026-07-02",
+    "additionalTerms": "",
+    "status": "accepted",
+    "createdAt": "2026-07-01T18:02:17.492Z",
+    "updatedAt": "2026-07-01T18:08:08.449Z",
+    "pdfFileName": "b7535369-9e6f-405e-b542-281a0024c495.pdf"
+  },
+  {
+    "id": "0e3925d1-6c89-4b4e-bf88-1ddc0a1f2f8f",
+    "candidateId": "6ff5c125-eb59-4d9c-9c99-ea050a753f59",
+    "jobId": "9a949db1-64ce-4be8-a929-c8e8bbcb62fd",
+    "companyId": "7d0e83d5-0b70-42b5-9699-919b6c66db9d",
+    "designation": "SDE",
+    "department": "Software Engineering",
+    "ctc": "12000k",
+    "joiningDate": "2026-07-03",
+    "additionalTerms": "",
+    "status": "sent",
+    "signToken": "11b072f9-267c-43d6-bd3b-94d72b5e565f",
+    "createdAt": "2026-07-02T15:18:17.009Z",
+    "updatedAt": "2026-07-02T15:18:29.772Z",
+    "pdfFileName": "0e3925d1-6c89-4b4e-bf88-1ddc0a1f2f8f.pdf"
+  }
+]

@@ -1,0 +1,62 @@
+[
+  {
+    "id": "445cf679-f254-449b-9764-3bc120d6afad",
+    "companyId": "7d0e83d5-0b70-42b5-9699-919b6c66db9d",
+    "employmentType": "full-time",
+    "requiredDocuments": [
+      "79e7405a-d477-4a94-af7d-b3bb6368c191",
+      "5ad2ba45-3192-4d89-ac22-4cc3c94a3373",
+      "aa9ec346-f37d-4704-a9d7-e28db5ae765c",
+      "6378cc6f-25b3-4602-acf1-6271e78036db",
+      "71769031-b50b-4455-a1b8-c5849c204866",
+      "4307b720-5181-44dd-9b92-8ddaaa1edd4e",
+      "16bd480c-e12e-4c1c-9e64-d8730a011b02",
+      "0800dcd6-82bc-485f-b540-7a793c37b373"
+    ],
+    "optionalDocuments": [
+      "ce33e1e8-2496-4bd6-bb52-a23d44202379"
+    ],
+    "createdAt": "2026-06-30T04:34:08.918Z",
+    "updatedAt": "2026-07-01T18:21:24.843Z"
+  },
+  {
+    "id": "59e997a4-78ef-4d6d-889c-a92daad3bc82",
+    "companyId": "7d0e83d5-0b70-42b5-9699-919b6c66db9d",
+    "employmentType": "contract",
+    "requiredDocuments": [
+      "0800dcd6-82bc-485f-b540-7a793c37b373",
+      "6378cc6f-25b3-4602-acf1-6271e78036db"
+    ],
+    "optionalDocuments": [
+      "ce33e1e8-2496-4bd6-bb52-a23d44202379"
+    ],
+    "createdAt": "2026-06-30T04:34:08.918Z",
+    "updatedAt": "2026-06-30T04:34:08.918Z"
+  },
+  {
+    "id": "24463f35-144d-4347-bfd3-358968a27fa2",
+    "companyId": "7d0e83d5-0b70-42b5-9699-919b6c66db9d",
+    "employmentType": "intern",
+    "requiredDocuments": [
+      "cf0690d2-8de7-453f-9b94-bec5972d15f1"
+    ],
+    "optionalDocuments": [],
+    "createdAt": "2026-06-30T04:34:08.918Z",
+    "updatedAt": "2026-06-30T04:34:08.918Z"
+  },
+  {
+    "id": "cda160df-fdf2-40a1-a7d7-36d8fddba64d",
+    "companyId": "7d0e83d5-0b70-42b5-9699-919b6c66db9d",
+    "employmentType": "part-time",
+    "requiredDocuments": [
+      "79e7405a-d477-4a94-af7d-b3bb6368c191",
+      "5ad2ba45-3192-4d89-ac22-4cc3c94a3373",
+      "6378cc6f-25b3-4602-acf1-6271e78036db"
+    ],
+    "optionalDocuments": [
+      "16bd480c-e12e-4c1c-9e64-d8730a011b02"
+    ],
+    "createdAt": "2026-06-30T04:34:08.918Z",
+    "updatedAt": "2026-06-30T04:34:08.918Z"
+  }
+]

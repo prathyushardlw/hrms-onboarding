@@ -1,0 +1,46 @@
+[
+  {
+    "id": "2e93ee0a-18f8-48c8-8bd5-4b7404951a4d",
+    "jobId": "10b0ef87-a6b0-472e-8603-a7ce78bb8641",
+    "companyId": "7d0e83d5-0b70-42b5-9699-919b6c66db9d",
+    "name": "Ananya Sharma",
+    "email": "ananya@example.com",
+    "phone": "+91 98765 43210",
+    "source": "linkedin",
+    "currentCompany": "TCS",
+    "currentDesignation": "React Developer",
+    "expectedSalary": "15 LPA",
+    "noticePeriod": "30 days",
+    "status": "offered",
+    "createdAt": "2026-06-30T15:10:48.816Z",
+    "updatedAt": "2026-06-30T15:21:00.295Z"
+  },
+  {
+    "id": "486ae7ee-d483-4c4f-b5ed-9b323fcece2d",
+    "jobId": "9a949db1-64ce-4be8-a929-c8e8bbcb62fd",
+    "companyId": "7d0e83d5-0b70-42b5-9699-919b6c66db9d",
+    "name": "Prathyusha Rekapalli",
+    "email": "prathyusha.r@labsquire.com",
+    "source": "linkedin",
+    "resumeFileName": "resume_1782925007804.docx",
+    "currentCompany": "TCS",
+    "currentDesignation": "SDR",
+    "expectedSalary": "100K",
+    "noticePeriod": "Immediate",
+    "status": "offered",
+    "notes": "Good Candidate",
+    "createdAt": "2026-07-01T16:56:47.804Z",
+    "updatedAt": "2026-07-01T20:27:09.824Z"
+  },
+  {
+    "id": "6ff5c125-eb59-4d9c-9c99-ea050a753f59",
+    "jobId": "9a949db1-64ce-4be8-a929-c8e8bbcb62fd",
+    "companyId": "7d0e83d5-0b70-42b5-9699-919b6c66db9d",
+    "name": "Teja",
+    "email": "teja.z@testgo.com",
+    "source": "linkedin",
+    "status": "offered",
+    "createdAt": "2026-07-02T15:14:09.506Z",
+    "updatedAt": "2026-07-02T15:18:42.751Z"
+  }
+]
